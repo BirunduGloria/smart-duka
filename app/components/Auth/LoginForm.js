@@ -1,6 +1,8 @@
+'use client';
 import { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserContext } from '../../context/UserContext';
+import '../../ashington-CSS/Login.css';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -11,22 +13,37 @@ function LoginForm() {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    const loggedInUser = { email, role: isAdmin ? 'admin' : 'user' };
+    const allowedAdminEmails = [
+        'ashington.munene@student.moringaschool.com',
+        'peter.munyambu@student.moringaschool.com',
+        'gideon.kimaiyo@student.moringaschool.com',
+        'gloria.birundu@student.moringaschool.com',
+        'beatrice.wambui@moringaschool.com',
+        ];
+
+    const isAdmin = allowedAdminEmails.includes(email) && password === '1234';
+;
+    const loggedInUser = {
+      email,
+      role: isAdmin ? 'admin' : 'user',
+    };
+
     localStorage.setItem('user', JSON.stringify(loggedInUser));
     setUser(loggedInUser);
 
-    router.push('/dashboard'); 
+    router.push(isAdmin ? '/inventory' : '/dashboard');
   };
 
   return (
-    <form onSubmit={handleLogin} className="flex flex-col gap-4 w-72">
+    <form onSubmit={handleLogin} className="login-form">
+      <h2>Login</h2>
+
       <input
         type="email"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
-        className="border p-2 rounded"
       />
 
       <input
@@ -35,30 +52,13 @@ function LoginForm() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
-        className="border p-2 rounded"
       />
 
-      <button
-        type="submit"
-        className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-      >
-        Log In
-      </button>
+      <button type="submit">Log In</button>
 
-      <div className="flex flex-col items-start text-sm mt-2">
-        <a
-          href="/forgot-password"
-          className="text-blue-600 underline hover:text-blue-800"
-        >
-          Forgot Password?
-        </a>
-
-        <a
-          href="/admin"
-          className="text-blue-600 underline hover:text-blue-800 mt-1"
-        >
-          Admin
-        </a>
+      <div className="links">
+        <a href="/forgot-password">Forgot password?</a>
+        <a href="/admin">Admin</a>
       </div>
     </form>
   );

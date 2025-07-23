@@ -134,3 +134,14 @@ form button:hover {
   text-decoration: underline;
   cursor: pointer;
 }
+
+.admin-heading {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  color: #fff;
+  text-align: center;
+}
+
+.role-link {
+  margin-top: 0.5rem;
+}

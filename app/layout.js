@@ -1,9 +1,7 @@
-'use client';
-
 import './globals.css';
 import { Inter } from 'next/font/google';
-import { useState } from 'react';
-import { UserContext } from './context/UserContext'; 
+import { ContextProvider } from './context/ContextProvider'; 
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
@@ -12,14 +10,12 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const [user, setUser] = useState(null);
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <UserContext.Provider value={{ user, setUser }}>
+        <ContextProvider>
           {children}
-        </UserContext.Provider>
+        </ContextProvider>
       </body>
     </html>
   );

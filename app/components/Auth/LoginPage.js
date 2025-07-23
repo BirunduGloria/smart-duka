@@ -12,9 +12,7 @@ function LoginPage() {
         <div className="form-panel login-panel">
           <LoginForm />
         </div>
-        <div className="form-panel signup-panel">
-          <SignupForm />
-        </div>
+        <div></div>
       </div>
 
       <button onClick={() => setIsLogin(!isLogin)} className="toggle-button">

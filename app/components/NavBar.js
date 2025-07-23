@@ -1,7 +1,7 @@
 // app/components/NavBar.js
 
 import Link from "next/link";
-import "../globals.css"; // You can move styles to a separate CSS file if needed
+
 
 export default function NavBar() {
   return (

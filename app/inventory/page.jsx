@@ -1,9 +1,10 @@
 'use client';
 
 import { useContext, useEffect } from 'react';
-import { UserContext } from '../../context/UserContext';
+//import { UserContext } from '../../context/UserContext';
+import InventoryList from '../components/InventoryList';
 import { useRouter } from 'next/navigation';
-import InventoryList from '../../components/InventoryList';
+import { UserContext } from '../context/UserContext';
 
 function InventoryPage() {
   const { user } = useContext(UserContext);

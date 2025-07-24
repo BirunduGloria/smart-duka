@@ -8,12 +8,17 @@ function Cart({ currency = "KES" }) {
   const [pastSales, setPastSales] = useState([]);
 
   // Fetch cart
-  useEffect(() => {
-    fetch(`${API_BASE}/cart`)
-      .then(res => res.json())
-      .then(setCartItems)
-      .catch(err => console.error("Cart fetch failed:", err));
-  }, []);
+ useEffect(() => {
+  fetch(`${API_BASE}/cart`)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+      }
+      return res.json();
+    })
+    .then(setCartItems)
+    .catch(err => console.error("Cart fetch failed:", err));
+}, []);
 
   // Fetch past purchases
   useEffect(() => {

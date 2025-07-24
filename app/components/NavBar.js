@@ -15,9 +15,9 @@ export default function NavBar() {
         <li><Link href="/">Home</Link></li>
         <li><Link href="/products">Products</Link></li>
         <li><Link href="/cart">Cart</Link></li>
-        {user?.role === 'admin' && (
+        {user && user.role === 'admin' ? (
           <li><Link href="/inventory">Inventory</Link></li>
-        )} {/*we have a condition to only show this if an admin is loggedin*/}
+        ) : null} {/*we have a condition to only show this if an admin is loggedin*/}
         <li><Link href="/login">Login</Link></li>
       </ul>
     </nav>

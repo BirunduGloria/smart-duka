@@ -62,7 +62,9 @@ export default function ProductsPage() {
     const updatedCart = [...cart, product];
     setCart(updatedCart);
     setMessage(`${product.name} added to cart!`);
+
     setTimeout(() => setMessage(''), 2500);
+
     localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
@@ -102,9 +104,11 @@ export default function ProductsPage() {
           onChange={(e) => setSearch(e.target.value)}
         />
         <div className="w-1/3">
+ 
           <label htmlFor="categoryFilter" className="block font-medium mb-1">
             Filter by Category:
           </label>
+
           <select
             id="categoryFilter"
             value={selectedCategory}
@@ -134,6 +138,8 @@ export default function ProductsPage() {
           {message}
         </div>
       )}
+
+
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {filteredProducts.map((product) => (

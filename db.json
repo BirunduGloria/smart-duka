@@ -13,16 +13,106 @@
       "quantity": 1
     },
     {
-      "id": 3,
+      "id": "bea0",
       "name": "Fresh Milk",
       "price": 100,
       "quantity": 2
     },
     {
-      "id": 4,
+      "id": "585f",
       "name": "Bread",
       "price": 80,
       "quantity": 1
+    }
+  ],
+  "sales": [
+    {
+      "id": "bd80",
+      "items": [
+        {
+          "id": 1,
+          "name": "Fresh Milk",
+          "price": 100,
+          "quantity": 2
+        },
+        {
+          "id": 2,
+          "name": "Bread",
+          "price": 80,
+          "quantity": 1
+        }
+      ],
+      "date": "2025-07-24T11:06:09.257Z",
+      "total": 280
+    },
+    {
+      "id": "18d5",
+      "items": [
+        {
+          "id": 1,
+          "name": "Fresh Milk",
+          "price": 100,
+          "quantity": 2
+        },
+        {
+          "id": 2,
+          "name": "Bread",
+          "price": 80,
+          "quantity": 1
+        }
+      ],
+      "date": "2025-07-24T12:48:01.287Z",
+      "total": 280
+    },
+    {
+      "id": "0ae2",
+      "items": [
+        {
+          "id": 1,
+          "name": "Fresh Milk",
+          "price": 100,
+          "quantity": 2
+        },
+        {
+          "id": 2,
+          "name": "Bread",
+          "price": 80,
+          "quantity": 1
+        }
+      ],
+      "date": "2025-07-24T14:07:04.754Z",
+      "total": 280
+    },
+    {
+      "id": "fce2",
+      "items": [
+        {
+          "id": 1,
+          "name": "Fresh Milk",
+          "price": 100,
+          "quantity": 2
+        },
+        {
+          "id": 2,
+          "name": "Bread",
+          "price": 80,
+          "quantity": 1
+        },
+        {
+          "id": "beba",
+          "name": "Fresh Milk",
+          "price": 100,
+          "quantity": 2
+        },
+        {
+          "id": "5c85",
+          "name": "Bread",
+          "price": 80,
+          "quantity": 1
+        }
+      ],
+      "date": "2025-07-24T19:00:13.451Z",
+      "total": 560
     }
   ]
 }

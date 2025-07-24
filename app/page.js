@@ -108,6 +108,16 @@ export default function Home() {
       inventory: { unitsSold: 110, unitsInStock: 2 },
       expiryDate: '2025-07-26',
     },
+     {
+      id: 11,
+      name: 'Product k',
+      category: 'Clothing',
+      image: 'https://via.placeholder.com/150',
+      pricing: { price: 350, discount: 0 },
+      inventory: { unitsSold: 110, unitsInStock: 6 },
+      expiryDate: '2025-07-26',
+    },
+    
   ];
 
   const handleSearch = (searchTerm) => {

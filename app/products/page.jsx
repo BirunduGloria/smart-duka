@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import ProductCard from '../components/ProductCard';
-import ProductForm from '../components/ProductForm';
-import NavBar from '../components/NavBar';
+import ProductCard from './ProductCard';
+import ProductForm from './ProductForm';
+import NavBar from './NavBar';
 import styles from '../components/ProductCard.module.css';
 
 export default function ProductsPage() {

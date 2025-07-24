@@ -1,0 +1,140 @@
+[
+  [
+  {
+    "id": 1,
+    "name": "Milk",
+    "category": "Food",
+    "image": "ttps://i.pinimg.com/736x/79/81/eb/7981ebddff2991fd734b6390a58daeb1.jpg",
+    "pricing": { "price": 2.5, "discount": 0.2 },
+    "inventory": { "unitsInStock": 2, "unitsSold": 60 },
+    "expiryDate": "2025-08-01"
+  },
+  {
+    "id": 2,
+    "name": "Bread",
+    "category": "Food",
+    "image": "https://i.pinimg.com/736x/7f/ce/7a/7fce7afbf66cf7fa520a560eb50a6e8f.jpg",
+    "pricing": { "price": 1.2, "discount": 0 },
+    "inventory": { "unitsInStock": 10, "unitsSold": 20 },
+    "expiryDate": "2026-07-25"
+  },
+  {
+    "id": 3,
+    "name": "Eggs",
+    "category": "Food",
+    "image": "https://i.pinimg.com/736x/1b/3e/0b/1b3e0b856b8937e09353290c7f9e3f88.jpg",
+    "pricing": { "price": 3.5, "discount": 0.1 },
+    "inventory": { "unitsInStock": 1, "unitsSold": 100 },
+    "expiryDate": "2026-07-28"
+  },
+  {
+    "id": 4,
+    "name": "T-Shirt",
+    "category": "Fashion",
+    "image": "https://i.pinimg.com/736x/27/b5/a1/27b5a1602087a7113d58118e357bdc54.jpg",
+    "pricing": { "price": 15.0, "discount": 0.05 },
+    "inventory": { "unitsInStock": 25, "unitsSold": 80 },
+    "expiryDate": "2039-01-30"
+  },
+  {
+    "id": 5,
+    "name": "Sneakers",
+    "category": "Fashion",
+    "image": "https://i.pinimg.com/736x/74/3a/37/743a37f67414e356b5c0e21438d09b93.jpg",
+    "pricing": { "price": 60.0, "discount": 0.15 },
+    "inventory": { "unitsInStock": 12, "unitsSold": 45 },
+    "expiryDate": null
+  },
+  {
+    "id": 6,
+    "name": "Smartphone",
+    "category": "Electronics",
+    "image": "https://i.pinimg.com/736x/10/70/04/1070045a0a4cf93fa3f65476dd0af581.jpg",
+    "pricing": { "price": 299.99, "discount": 0.1 },
+    "inventory": { "unitsInStock": 8, "unitsSold": 150 },
+    "expiryDate": "2033-06-30"
+  },
+  {
+    "id": 7,
+    "name": "Bluetooth Headphones",
+    "category": "Electronics",
+    "image": "https://i.pinimg.com/736x/cc/62/06/cc6206921ad8078367b874fd3b3d1541.jpg",
+    "pricing": { "price": 89.99, "discount": 0.2 },
+    "inventory": { "unitsInStock": 15, "unitsSold": 70 },
+    "expiryDate": "2028-06-30"
+  },
+  {
+    "id": 8,
+    "name": "Shampoo",
+    "category": "Personal Care",
+    "image": "https://i.pinimg.com/1200x/11/71/10/117110a5292640f44906f2d011ec87d4.jpg",
+    "pricing": { "price": 5.5, "discount": 0.1 },
+    "inventory": { "unitsInStock": 30, "unitsSold": 120 },
+    "expiryDate": "2026-01-15"
+  },
+  {
+    "id": 9,
+    "name": "Toothpaste",
+    "category": "Personal Care",
+    "image": "https://i.pinimg.com/736x/ea/d4/a1/ead4a18eac6ea25ab209ec3abe987a71.jpg",
+    "pricing": { "price": 2.0, "discount": 0 },
+    "inventory": { "unitsInStock": 50, "unitsSold": 200 },
+    "expiryDate": "2026-03-10"
+  },
+  {
+    "id": 10,
+    "name": "Notebook",
+    "category": "Stationery",
+    "image": "https://i.pinimg.com/736x/0e/d4/38/0ed43841b4d2fb816d14b8d8f01ae6d6.jpg",
+    "pricing": { "price": 3.0, "discount": 0.05 },
+    "inventory": { "unitsInStock": 40, "unitsSold": 90 },
+    "expiryDate": null
+  },
+  {
+    "id": 11,
+    "name": "Ballpoint Pen",
+    "category": "Stationery",
+    "image": "https://i.pinimg.com/736x/e5/90/67/e590675ec56629109e90732a03f64de5.jpg",
+    "pricing": { "price": 0.8, "discount": 0 },
+    "inventory": { "unitsInStock": 100, "unitsSold": 300 },
+    "expiryDate": "2051-06-30"
+  },
+  {
+    "id": 12,
+    "name": "Face Cream",
+    "category": "Personal Care",
+    "image": "https://i.pinimg.com/736x/d5/9a/9e/d59a9e80e6ec1f44347e82e350835ec4.jpg",
+    "pricing": { "price": 12.0, "discount": 0.15 },
+    "inventory": { "unitsInStock": 20, "unitsSold": 65 },
+    "expiryDate": "2026-06-30"
+  },
+  {
+    "id": 13,
+    "name": "Laptop",
+    "category": "Electronics",
+    "image": "https://i.pinimg.com/736x/d0/02/08/d00208dc2bfbba705f755b4aa927ce62.jpg",
+    "pricing": { "price": 799.0, "discount": 0.1 },
+    "inventory": { "unitsInStock": 5, "unitsSold": 40 },
+    "expiryDate": "2027-11-30"
+  },
+  {
+    "id": 14,
+    "name": "Jeans",
+    "category": "Fashion",
+    "image": "https://i.pinimg.com/236x/de/36/7d/de367df8fb57012eae77d875c258b736.jpg",
+    "pricing": { "price": 40.0, "discount": 0.2 },
+    "inventory": { "unitsInStock": 18, "unitsSold": 55 },
+    "expiryDate": "2030-06-30"
+  },
+  {
+    "id": 15,
+    "name": "Highlighter Set",
+    "category": "Stationery",
+    "image": "https://i.pinimg.com/736x/88/7f/16/887f164fd7f5891152ffc487d69e71f9.jpg",
+    "pricing": { "price": 4.5, "discount": 0.1 },
+    "inventory": { "unitsInStock": 35, "unitsSold": 110 },
+    "expiryDate": "2046-03-30"
+  }
+]
+
+]

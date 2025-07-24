@@ -1,9 +1,9 @@
-'use client';
+ 'use client';
 import React, { useEffect, useState } from 'react';
 import ProductCard from '../components/ProductCard';
 import ProductForm from '../components/ProductForm';
-
-// Dummy data – replace with API call if needed
+import NavBar from '../components/NavBar';  
+// Dummy product data
 const dummyProducts = [
   {
     id: 1,
@@ -43,10 +43,10 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [editingProduct, setEditingProduct] = useState(null);
-  const isAdmin = true; // toggle manually for demo
+  const [message, setMessage] = useState('');
+  const isAdmin = true;
 
   useEffect(() => {
-    // Simulate API fetch
     setProducts(dummyProducts);
     const storedCart = localStorage.getItem('cart');
     if (storedCart) {
@@ -59,7 +59,11 @@ export default function ProductsPage() {
   }, [cart]);
 
   const handleAddToCart = (product) => {
-    setCart([...cart, product]);
+    const updatedCart = [...cart, product];
+    setCart(updatedCart);
+    setMessage(`${product.name} added to cart!`);
+    setTimeout(() => setMessage(''), 2500);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
   const handleEdit = (product) => {
@@ -98,22 +102,24 @@ export default function ProductsPage() {
           onChange={(e) => setSearch(e.target.value)}
         />
         <div className="w-1/3">
-  <label htmlFor="categoryFilter" className="block font-medium mb-1">Filter by Category:</label>
-  <select
-    id="categoryFilter"
-    value={selectedCategory}
-    onChange={(e) => setSelectedCategory(e.target.value)}
-    className="border p-2 w-full rounded"
-  >
-    <option value="">All</option>
-    {Array.from(new Set(products.map((p) => p.category))).map((cat, i) => (
-      <option key={i} value={cat}>
-        {cat}
-      </option>
-    ))}
-  </select>
-</div>
-</div>
+          <label htmlFor="categoryFilter" className="block font-medium mb-1">
+            Filter by Category:
+          </label>
+          <select
+            id="categoryFilter"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="border p-2 w-full rounded"
+          >
+            <option value="">All</option>
+            {Array.from(new Set(products.map((p) => p.category))).map((cat, i) => (
+              <option key={i} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       {editingProduct && (
         <ProductForm
@@ -121,6 +127,12 @@ export default function ProductsPage() {
           onSave={handleSave}
           onCancel={() => setEditingProduct(null)}
         />
+      )}
+
+      {message && (
+        <div className="bg-green-100 text-green-800 p-2 rounded mb-4 shadow">
+          {message}
+        </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -137,10 +149,14 @@ export default function ProductsPage() {
       </div>
 
       <div className="mt-6">
-        <h2 className="text-xl font-semibold">🛒 Your Cart ({cart.length} items)</h2>
+        <h2 className="text-xl font-semibold">
+          🛒 Your Cart ({cart.length} items)
+        </h2>
         <ul className="list-disc pl-6">
           {cart.map((item, index) => (
-            <li key={index}>{item.name} - ${item.price}</li>
+            <li key={index}>
+              {item.name} - ${item.price}
+            </li>
           ))}
         </ul>
       </div>

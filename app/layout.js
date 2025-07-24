@@ -1,6 +1,6 @@
-// app/layout.js
 import './globals.css';
 import { Inter } from 'next/font/google';
+import { ContextProvider } from './context/ContextProvider'; {/*Guys i have added this line */} 
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -13,7 +13,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        {children}
+        <ContextProvider>
+          {children}
+        </ContextProvider>
       </body>
     </html>
   );

@@ -1,100 +1,206 @@
 'use client';
 import { useState } from 'react';
 import NavBar from '../app/components/NavBar';
+import SearchBar from '../app/components/SearchBar';
+import './globals.css';
 
 export default function Home() {
   const isAdmin = true;
-
   const [currency, setCurrency] = useState('KES');
+  const [query, setQuery] = useState('');
+  const conversionRate = 150;
 
-  const conversionRate = 150; // 1 USD = 150 KES
+  const today = new Date();
+  const daysFromToday = (dateStr) => {
+    const expiry = new Date(dateStr);
+    return (expiry - today) / (1000 * 60 * 60 * 24);
+  };
 
-  const products = [
-    { id: 1, name: 'Product A', price: 200, discount: true, unitsSold: 120, stock: 3, expiresSoon: false, image: 'https://via.placeholder.com/150' },
-    { id: 2, name: 'Product B', price: 500, discount: false, unitsSold: 60, stock: 10, expiresSoon: true, image: 'https://via.placeholder.com/150' },
-    { id: 3, name: 'Product C', price: 150, discount: true, unitsSold: 20, stock: 2, expiresSoon: false, image: 'https://via.placeholder.com/150' },
-    { id: 4, name: 'Product D', price: 300, discount: false, unitsSold: 55, stock: 8, expiresSoon: false, image: 'https://via.placeholder.com/150' },
-    { id: 5, name: 'Product E', price: 100, discount: true, unitsSold: 70, stock: 1, expiresSoon: true, image: 'https://via.placeholder.com/150' },
-    { id: 6, name: 'Product F', price: 250, discount: false, unitsSold: 30, stock: 6, expiresSoon: false, image: 'https://via.placeholder.com/150' },
-    { id: 7, name: 'Product G', price: 180, discount: true, unitsSold: 85, stock: 4, expiresSoon: false, image: 'https://via.placeholder.com/150' },
-    { id: 8, name: 'Product H', price: 400, discount: false, unitsSold: 95, stock: 9, expiresSoon: true, image: 'https://via.placeholder.com/150' },
-    { id: 9, name: 'Product I', price: 220, discount: true, unitsSold: 40, stock: 3, expiresSoon: false, image: 'https://via.placeholder.com/150' },
-    { id: 10, name: 'Product J', price: 350, discount: false, unitsSold: 110, stock: 2, expiresSoon: true, image: 'https://via.placeholder.com/150' },
+  const allProducts = [
+    // ... (your 10 products unchanged)
+    {
+      id: 1,
+      name: 'Product A',
+      category: 'Beverages',
+      image: 'https://placehold.co/600x400',
+      pricing: { price: 200, discount: 0.1 },
+      inventory: { unitsSold: 120, unitsInStock: 3 },
+      expiryDate: '2025-07-30',
+    },
+    {
+      id: 2,
+      name: 'Product B',
+      category: 'Snacks',
+      image: 'https://via.placeholder.com/150',
+      pricing: { price: 500, discount: 0 },
+      inventory: { unitsSold: 60, unitsInStock: 10 },
+      expiryDate: '2025-07-25',
+    },
+    {
+      id: 3,
+      name: 'Product C',
+      category: 'Dairy',
+      image: 'https://via.placeholder.com/150',
+      pricing: { price: 150, discount: 0.05 },
+      inventory: { unitsSold: 20, unitsInStock: 2 },
+      expiryDate: '2025-08-20',
+    },
+    {
+      id: 4,
+      name: 'Product D',
+      category: 'Grocery',
+      image: 'https://via.placeholder.com/150',
+      pricing: { price: 300, discount: 0 },
+      inventory: { unitsSold: 55, unitsInStock: 8 },
+      expiryDate: '2025-08-01',
+    },
+    {
+      id: 5,
+      name: 'Product E',
+      category: 'Bakery',
+      image: 'https://via.placeholder.com/150',
+      pricing: { price: 100, discount: 0.15 },
+      inventory: { unitsSold: 70, unitsInStock: 1 },
+      expiryDate: '2025-07-28',
+    },
+    {
+      id: 6,
+      name: 'Product F',
+      category: 'Canned',
+      image: 'https://via.placeholder.com/150',
+      pricing: { price: 250, discount: 0 },
+      inventory: { unitsSold: 30, unitsInStock: 6 },
+      expiryDate: '2025-09-10',
+    },
+    {
+      id: 7,
+      name: 'Product G',
+      category: 'Snacks',
+      image: 'https://via.placeholder.com/150',
+      pricing: { price: 180, discount: 0.2 },
+      inventory: { unitsSold: 85, unitsInStock: 4 },
+      expiryDate: '2025-08-05',
+    },
+    {
+      id: 8,
+      name: 'Product H',
+      category: 'Drinks',
+      image: 'https://via.placeholder.com/150',
+      pricing: { price: 400, discount: 0 },
+      inventory: { unitsSold: 95, unitsInStock: 9 },
+      expiryDate: '2025-07-27',
+    },
+    {
+      id: 9,
+      name: 'Product I',
+      category: 'Grocery',
+      image: 'https://via.placeholder.com/150',
+      pricing: { price: 220, discount: 0.05 },
+      inventory: { unitsSold: 40, unitsInStock: 3 },
+      expiryDate: '2025-08-10',
+    },
+    {
+      id: 10,
+      name: 'Product J',
+      category: 'Beverages',
+      image: 'https://via.placeholder.com/150',
+      pricing: { price: 350, discount: 0 },
+      inventory: { unitsSold: 110, unitsInStock: 2 },
+      expiryDate: '2025-07-26',
+    },
   ];
 
+  const handleSearch = (searchTerm) => {
+    setQuery(searchTerm.toLowerCase());
+  };
+
+  const filteredProducts = allProducts.filter((p) =>
+    p.name.toLowerCase().includes(query)
+  );
+
   const formatPrice = (price) => {
-    if (currency === 'USD') {
-      return `$ ${(price / conversionRate).toFixed(2)}`;
-    }
-    return `KSh ${price}`;
+    const converted = currency === 'USD' ? (price / conversionRate).toFixed(2) : price;
+    return currency === 'USD' ? `$ ${converted}` : `KSh ${converted}`;
   };
 
   return (
     <>
-      <NavBar />
-      <main className="pt-24 px-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold"></h1>
-          <div>
-            <label className="mr-2 text-gray-600">currency:</label>
-            <select
-              className="border px-2 py-1 rounded"
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-            >
+      <NavBar>
+        <SearchBar onSearch={handleSearch} />
+      </NavBar>
+
+      <main className="main-container">
+        <div className="header-section standout-header">
+          <h1>Welcome to E-Shop</h1>
+          <div className="currency-selector">
+            <label>Currency:</label>
+            <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
               <option value="KES">KES</option>
               <option value="USD">USD</option>
             </select>
           </div>
         </div>
 
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">featured products</h2>
-          <ul className="grid grid-cols-2 gap-4">
-            {products.filter(p => p.discount).map(product => (
-              <li key={product.id} className="bg-white p-4 rounded shadow">
-                <img src={product.image} alt={product.name} className="w-full h-32 object-cover rounded mb-2" />
-                <p className="font-medium">{product.name}</p>
-                <p className="text-sm text-gray-600">{formatPrice(product.price)}</p>
-              </li>
-            ))}
+        <section className="section standout-section">
+          <h2>Featured Products</h2>
+          <ul className="product-grid standout-grid">
+            {filteredProducts
+              .filter((p) => p.pricing.discount > 0)
+              .map((product) => (
+                <li key={product.id} className="product-card standout-card">
+                  <div className="image-container">
+                    <img src={product.image} alt={product.name} />
+                    <span className="discount-badge">
+                      -{(product.pricing.discount * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  <p className="product-name">{product.name}</p>
+                  <p className="product-price">{formatPrice(product.pricing.price)}</p>
+                </li>
+              ))}
           </ul>
         </section>
 
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">fast selling products</h2>
-          <ul className="grid grid-cols-2 gap-4">
-            {products.filter(p => p.unitsSold > 50).map(product => (
-              <li key={product.id} className="bg-white p-4 rounded shadow">
-                <img src={product.image} alt={product.name} className="w-full h-32 object-cover rounded mb-2" />
-                <p className="font-medium">{product.name}</p>
-                <p className="text-sm text-gray-600">{formatPrice(product.price)}</p>
-                <p className="text-xs text-gray-500">{product.unitsSold} units sold</p>
-              </li>
-            ))}
+        <section className="section standout-section">
+          <h2>Fast Selling Products</h2>
+          <ul className="product-grid standout-grid">
+            {filteredProducts
+              .filter((p) => p.inventory.unitsSold > 50)
+              .map((product) => (
+                <li key={product.id} className="product-card standout-card">
+                  <img src={product.image} alt={product.name} />
+                  <p className="product-name">{product.name}</p>
+                  <p className="product-price">{formatPrice(product.pricing.price)}</p>
+                  <p className="product-units">{product.inventory.unitsSold} units sold</p>
+                </li>
+              ))}
           </ul>
         </section>
 
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">smart stock alerts</h2>
-          <ul className="list-disc ml-6 text-sm text-red-600">
-            {products.filter(p => p.stock < 5).map(product => (
-              <li key={product.id}>
-                {product.name} - only {product.stock} left
-              </li>
-            ))}
+        <section className="section standout-section">
+          <h2>Smart Stock Alerts</h2>
+          <ul className="alert-list standout-alert">
+            {filteredProducts
+              .filter((p) => p.inventory.unitsInStock < 5)
+              .map((product) => (
+                <li key={product.id}>
+                  <span className="product-name">{product.name}</span> – only {product.inventory.unitsInStock} left
+                </li>
+              ))}
           </ul>
         </section>
 
         {isAdmin && (
-          <section>
-            <h2 className="text-xl font-semibold mb-3">expiring soon</h2>
-            <ul className="list-disc ml-6 text-sm text-orange-500">
-              {products.filter(p => p.expiresSoon).map(product => (
-                <li key={product.id}>
-                  {product.name} - expiring soon
-                </li>
-              ))}
+          <section className="section standout-section">
+            <h2>Expiring Soon</h2>
+            <ul className="alert-list standout-alert expiring">
+              {filteredProducts
+                .filter((p) => daysFromToday(p.expiryDate) <= 7)
+                .map((product) => (
+                  <li key={product.id}>
+                    <span className="product-name">{product.name}</span> – expiring soon ({product.expiryDate})
+                  </li>
+                ))}
             </ul>
           </section>
         )}

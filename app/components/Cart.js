@@ -2,34 +2,72 @@
 
 import { useState, useEffect } from 'react';
 
- function Cart() {
+function Cart() {
   const [cartItems, setCartItems] = useState([]);
+  const [currency, setCurrency] = useState('KES');
+  const [salesHistory, setSalesHistory] = useState([]);
 
-  // Fetch cart items from your API
+  // Load cart items on mount
   useEffect(() => {
     fetch('http://localhost:3001/cart')
-      .then((res) => res.json())
+      .then(res => res.json())
       .then(setCartItems)
-      .catch((err) => console.error('Failed to fetch cart:', err));
+      .catch(err => console.error('Failed to fetch cart:', err));
+
+    fetch('http://localhost:3001/sales')
+      .then(res => res.json())
+      .then(setSalesHistory)
+      .catch(err => console.error('Failed to fetch sales history:', err));
   }, []);
 
-  const handleQuantityChange = (id, newQuantity) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
+  const handleQuantityChange = (id, newQty) => {
+    setCartItems(prev =>
+      prev.map(item => item.id === id ? { ...item, quantity: newQty } : item)
     );
-    // Optional: update on server with PATCH
+
     fetch(`http://localhost:3001/cart/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quantity: newQuantity }),
+      body: JSON.stringify({ quantity: newQty }),
     });
   };
 
   const handleRemove = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
+    setCartItems(prev => prev.filter(item => item.id !== id));
     fetch(`http://localhost:3001/cart/${id}`, { method: 'DELETE' });
+  };
+
+  const handleCheckout = () => {
+    if (cartItems.length === 0) return alert("Cart is empty!");
+
+    const sale = {
+      items: cartItems,
+      total: total,
+      currency: currency,
+      date: new Date().toISOString(),
+    };
+
+    fetch('http://localhost:3001/sales', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sale),
+    })
+      .then(() => {
+        setCartItems([]);
+        alert("Checkout complete!");
+      })
+      .catch(err => alert("Checkout failed."));
+  };
+
+  const handleReorder = (sale) => {
+    sale.items.forEach(item => {
+      fetch('http://localhost:3001/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item),
+      });
+    });
+    alert("Items reordered to cart!");
   };
 
   const total = cartItems.reduce(
@@ -39,52 +77,85 @@ import { useState, useEffect } from 'react';
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
+      <h1 className="text-2xl font-bold mb-4">🛒 Your Cart</h1>
+
       {cartItems.length === 0 ? (
         <p className="text-gray-600">Your cart is empty.</p>
       ) : (
-        cartItems.map((item) => (
-          <CartItem
-            key={item.id}
-            item={item}
-            onQuantityChange={handleQuantityChange}
-            onRemove={handleRemove}
-          />
+        <>
+          {cartItems.map(item => (
+            <CartItem
+              key={item.id}
+              item={item}
+              onQuantityChange={handleQuantityChange}
+              onRemove={handleRemove}
+            />
+          ))}
+          <div className="mt-6 text-xl font-semibold">
+            Total: {currency} {total.toFixed(2)}
+          </div>
+          <button
+            onClick={handleCheckout}
+            className="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            Checkout
+          </button>
+        </>
+      )}
+
+      {/* Sales History */}
+      <h2 className="text-xl font-bold mt-10 mb-2">🧾 Past Purchases</h2>
+      {salesHistory.length === 0 ? (
+        <p className="text-gray-500">No past purchases yet.</p>
+      ) : (
+        salesHistory.map((sale, i) => (
+          <div key={i} className="border p-3 mb-4 rounded shadow-sm">
+            <div className="font-semibold">
+              {new Date(sale.date).toLocaleString()}
+            </div>
+            <ul className="text-sm mb-2">
+              {sale.items.map((item, idx) => (
+                <li key={idx}>
+                  {item.name} x {item.quantity} - {item.currency} {item.price}
+                </li>
+              ))}
+            </ul>
+            <div className="font-medium mb-2">
+              Total: {sale.currency} {sale.total.toFixed(2)}
+            </div>
+            <button
+              onClick={() => handleReorder(sale)}
+              className="text-blue-600 hover:underline"
+            >
+              Reorder
+            </button>
+          </div>
         ))
       )}
-      <div className="mt-6 text-xl font-semibold">
-        Total: KES {total.toFixed(2)}
-      </div>
     </div>
   );
 }
 
-// ✅ Define CartItem inside Cart.js
 function CartItem({ item, onQuantityChange, onRemove }) {
   const { id, name, price, quantity, currency } = item;
-
-  const handleChange = (e) => {
-    const newQuantity = parseInt(e.target.value);
-    if (!isNaN(newQuantity) && newQuantity >= 0) {
-      onQuantityChange(id, newQuantity);
-    }
-  };
 
   return (
     <div className="flex justify-between items-center mb-4 border-b pb-2">
       <div>
         <h4 className="text-lg font-semibold">{name}</h4>
         <p className="text-sm text-gray-600">
-          {currency} {price.toFixed(2)} x {quantity}
+          {currency} {price.toFixed(2)} x {quantity} = {currency} {(price * quantity).toFixed(2)}
         </p>
       </div>
       <div className="flex items-center gap-2">
         <input
           type="number"
           value={quantity}
-          onChange={handleChange}
+          onChange={e =>
+            onQuantityChange(id, parseInt(e.target.value) || 0)
+          }
           className="w-16 border rounded px-2 py-1"
-          min="0"
+          min="1"
         />
         <button
           onClick={() => onRemove(id)}
@@ -96,4 +167,5 @@ function CartItem({ item, onQuantityChange, onRemove }) {
     </div>
   );
 }
+
 export default Cart;

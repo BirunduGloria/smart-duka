@@ -26,7 +26,7 @@ export default function NavBar({ onSearch }) {
         <li><Link href="/">Home</Link></li>
         <li><Link href="/Products">products</Link></li>
         <li><Link href="/cart">Cart</Link></li>
-        <li><Link href="app/components/login">Login</Link></li>
+        <li><Link href="/login">Login</Link></li>
 
         {user?.role === 'admin' && (
           <li><Link href="/inventory">Inventory</Link></li>

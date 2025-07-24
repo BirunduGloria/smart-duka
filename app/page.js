@@ -124,6 +124,7 @@ export default function Home() {
   };
 
   return (
+
     <>
       <NavBar>
         <SearchBar onSearch={handleSearch} />

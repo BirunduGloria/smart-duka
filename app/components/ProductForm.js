@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import styles from './ProductForm.module.css';
+import styles from './ProductCard.module.css';
 
 export default function ProductForm({ onSubmit, initialData = {} }) {
   const [formData, setFormData] = useState({

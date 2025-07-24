@@ -1,19 +1,4 @@
 {
-  "cart": [
-    {
-      "id": 1,
-      "name": "Tomato",
-      "price": 50,
-      "quantity": 2,
-      "currency": "KES"
-    },
-    {
-      "id": 2,
-      "name": "Milk",
-      "price": 100,
-      "quantity": 1,
-      "currency": "KES"
-    }
-  ],
+  "cart": [],
   "sales": []
 }

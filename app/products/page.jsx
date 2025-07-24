@@ -43,6 +43,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [editingProduct, setEditingProduct] = useState(null);
+  const [message, setMessage] = useState('');
   const isAdmin = true; // toggle manually for demo
 
   useEffect(() => {
@@ -58,27 +59,17 @@ export default function ProductsPage() {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const handleAddToCart = async (product) => {
+  const handleAddToCart = (product) => {
   const updatedCart = [...cart, product];
   setCart(updatedCart);
+  setMessage(`${product.name} added to cart!`);
 
-  try {
-    const response = await fetch('http://localhost:3000/cart', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updatedCart),
-    });
+  // Clear message after 2.5s
+  setTimeout(() => setMessage(''), 2500);
 
-    if (!response.ok) {
-      throw new Error('Failed to update cart on server');
-    }
-  } catch (error) {
-    console.error('Error pushing cart:', error.message);
-  }
+  // Optional: store cart in localStorage right away
+  localStorage.setItem('cart', JSON.stringify(updatedCart));
 };
-
 
   const handleEdit = (product) => {
     setEditingProduct(product);
@@ -140,7 +131,11 @@ export default function ProductsPage() {
           onCancel={() => setEditingProduct(null)}
         />
       )}
-
+      {message && (
+  <div className="bg-green-100 text-green-800 p-2 rounded mb-4 shadow">
+    {message}
+  </div>
+)}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {filteredProducts.map((product) => (
           <ProductCard

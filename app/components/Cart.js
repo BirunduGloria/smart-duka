@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-export default function Cart() {
+ function Cart() {
   const [cartItems, setCartItems] = useState([]);
 
   // Fetch cart items from your API
@@ -96,3 +96,4 @@ function CartItem({ item, onQuantityChange, onRemove }) {
     </div>
   );
 }
+export default Cart;

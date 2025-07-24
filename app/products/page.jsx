@@ -1,0 +1,140 @@
+'use client';
+import React, { useEffect, useState } from 'react';
+import ProductCard from '../components/ProductCard';
+import ProductForm from '../components/ProductForm';
+
+// Dummy data – replace with API call if needed
+const dummyProducts = [
+  {
+    id: 1,
+    name: 'Milk',
+    category: 'Dairy',
+    price: 2.5,
+    discount: 0.2,
+    unitsSold: 60,
+    stock: 2,
+    expiry: '2025-08-01',
+  },
+  {
+    id: 2,
+    name: 'Bread',
+    category: 'Bakery',
+    price: 1.2,
+    discount: 0,
+    unitsSold: 20,
+    stock: 10,
+    expiry: '2024-07-25',
+  },
+  {
+    id: 3,
+    name: 'Eggs',
+    category: 'Dairy',
+    price: 3.5,
+    discount: 0.1,
+    unitsSold: 100,
+    stock: 1,
+    expiry: '2024-07-28',
+  },
+];
+
+export default function ProductsPage() {
+  const [products, setProducts] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [editingProduct, setEditingProduct] = useState(null);
+  const isAdmin = true; // toggle manually for demo
+
+  useEffect(() => {
+    // Simulate API fetch
+    setProducts(dummyProducts);
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) {
+      setCart(JSON.parse(storedCart));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
+
+  const handleAddToCart = (product) => {
+    setCart([...cart, product]);
+  };
+
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+  };
+
+  const handleDelete = (id) => {
+    setProducts(products.filter((p) => p.id !== id));
+  };
+
+  const handleSave = (updatedProduct) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+    );
+    setEditingProduct(null);
+  };
+
+  const filteredProducts = products.filter((p) => {
+    const nameMatch = p.name.toLowerCase().includes(search.toLowerCase());
+    const categoryMatch = selectedCategory
+      ? p.category.toLowerCase().includes(selectedCategory.toLowerCase())
+      : true;
+    return nameMatch && categoryMatch;
+  });
+
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Product Catalog</h1>
+
+      <div className="flex gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="Search by name"
+          className="border p-2 w-1/3"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Filter by category"
+          className="border p-2 w-1/3"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        />
+      </div>
+
+      {editingProduct && (
+        <ProductForm
+          product={editingProduct}
+          onSave={handleSave}
+          onCancel={() => setEditingProduct(null)}
+        />
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {filteredProducts.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            isAdmin={isAdmin}
+            onAddToCart={handleAddToCart}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ))}
+      </div>
+
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold">🛒 Your Cart ({cart.length} items)</h2>
+        <ul className="list-disc pl-6">
+          {cart.map((item, index) => (
+            <li key={index}>{item.name} - ${item.price}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}

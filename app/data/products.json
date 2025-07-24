@@ -3,6 +3,7 @@
     "id": 1,
     "name": "Milk",
     "category": "Dairy",
+    "image": "https://example.com/milk.jpg",
     "pricing": {
       "price": 2.5,
       "discount": 0.2

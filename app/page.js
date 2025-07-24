@@ -133,9 +133,7 @@ export default function Home() {
 
   return (
     <>
-      <NavBar>
-        <SearchBar onSearch={handleSearch} />
-      </NavBar>
+      <NavBar onSearch={handleSearch} />
 
       <main className="main-container">
         <div className="header-section standout-header">

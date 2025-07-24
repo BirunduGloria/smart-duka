@@ -398,7 +398,7 @@ header {
 
 .standout-alert {
   background: linear-gradient(135deg, #fee2e2, #fef3c7);
-  padding: 1.5rem;
+  padding: 1.5r    em;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   animation: pulse 2s infinite;

@@ -3,7 +3,8 @@
 import { useContext } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { UserContext } from '.././context/UserContext.js';
+import { UserContext } from '.././context/UserContext';
+
 import Link from "next/link";
 import SearchBar from "./SearchBar";
 import "../globals.css";

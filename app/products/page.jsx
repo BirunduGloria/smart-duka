@@ -58,9 +58,27 @@ export default function ProductsPage() {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const handleAddToCart = (product) => {
-    setCart([...cart, product]);
-  };
+  const handleAddToCart = async (product) => {
+  const updatedCart = [...cart, product];
+  setCart(updatedCart);
+
+  try {
+    const response = await fetch('http://localhost:3000/cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedCart),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update cart on server');
+    }
+  } catch (error) {
+    console.error('Error pushing cart:', error.message);
+  }
+};
+
 
   const handleEdit = (product) => {
     setEditingProduct(product);

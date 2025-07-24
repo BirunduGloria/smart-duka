@@ -38,11 +38,19 @@ const dummyProducts = [
 ];
 
 export default function ProductsPage() {
+    return (
+    <div>
+      <h1>Our Products</h1>
+      <ProductCard />
+    </div>
+  );
+}
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [editingProduct, setEditingProduct] = useState(null);
+  const [message, setMessage] = useState('');
   const isAdmin = true; // toggle manually for demo
 
   useEffect(() => {
@@ -59,8 +67,16 @@ export default function ProductsPage() {
   }, [cart]);
 
   const handleAddToCart = (product) => {
-    setCart([...cart, product]);
-  };
+  const updatedCart = [...cart, product];
+  setCart(updatedCart);
+  setMessage(`${product.name} added to cart!`);
+
+  // Clear message after 2.5s
+  setTimeout(() => setMessage(''), 2500);
+
+  // Optional: store cart in localStorage right away
+  localStorage.setItem('cart', JSON.stringify(updatedCart));
+};
 
   const handleEdit = (product) => {
     setEditingProduct(product);
@@ -122,7 +138,11 @@ export default function ProductsPage() {
           onCancel={() => setEditingProduct(null)}
         />
       )}
-
+      {message && (
+  <div className="bg-green-100 text-green-800 p-2 rounded mb-4 shadow">
+    {message}
+  </div>
+)}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {filteredProducts.map((product) => (
           <ProductCard

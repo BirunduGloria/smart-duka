@@ -1,24 +1,47 @@
 'use client';
 
 import { useContext } from 'react';
-import { UserContext } from '../../context/UserContext';
+import { useRouter } from 'next/navigation';
+import { UserContext } from '.././context/UserContext.js';
 import Link from "next/link";
+import SearchBar from "./SearchBar";
 import "../globals.css";
 
-export default function NavBar() {
-  const { user } = useContext(UserContext); 
+export default function NavBar({ onSearch }) {
+  const { user, setUser } = useContext(UserContext);
+  const router = useRouter();
+
+  const handleLogout = () => {
+    setUser(null);
+    router.push("/login");
+  };
 
   return (
-    <nav className="navbar">
-      <div className="nav-logo">SmartPOS</div>
-      <ul className="nav-links">
+    <nav className="navbar p-4 border-b flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="nav-logo text-xl font-bold">Smart Duka</div>
+
+      <SearchBar onSearch={onSearch} />
+
+      <ul className="nav-links flex space-x-4">
         <li><Link href="/">Home</Link></li>
-        <li><Link href="/products">Products</Link></li>
+        <li><Link href="/Products">products</Link></li>
         <li><Link href="/cart">Cart</Link></li>
-        {user && user.role === 'admin' ? (
+
+
+        {user?.role === 'admin' && (
           <li><Link href="/inventory">Inventory</Link></li>
-        ) : null} {/*we have a condition to only show this if an admin is loggedin*/}
-        <li><Link href="/login">Login</Link></li>
+        )}
+
+        {user ? (
+          <li>
+            <button onClick={handleLogout} className="text-red-600 hover:underline">
+              Logout
+            </button>
+          </li>
+        ) : (
+          <li><Link href="/login">Login</Link></li>
+        )}
+
       </ul>
     </nav>
   );

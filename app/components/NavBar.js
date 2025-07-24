@@ -1,12 +1,12 @@
-// app/components/NavBar.js
+
 
 import Link from "next/link";
-import "../globals.css"; // You can move styles to a separate CSS file if needed
+
 
 export default function NavBar() {
   return (
     <nav className="navbar">
-      <div className="nav-logo">SmartPOS</div>
+      <div className="nav-logo">Smart Duka</div>
       <ul className="nav-links">
         <li><Link href="/">Home</Link></li>
         <li><Link href="/products">Products</Link></li>

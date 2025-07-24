@@ -6,7 +6,7 @@ import Link from "next/link";
 import "../globals.css";
 
 export default function NavBar() {
-  const { user } = useContext(UserContext); {/* imported user info*/}
+  const { user } = useContext(UserContext); 
 
   return (
     <nav className="navbar">

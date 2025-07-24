@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import ProductCard from '../components/ProductCard';
 import ProductForm from '../components/ProductForm';
-import NavBar from '../components/NavBar';
+import NavBar from '../components/NavBar';  
 // Dummy product data
 const dummyProducts = [
   {

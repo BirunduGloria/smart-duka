@@ -5,40 +5,6 @@ import ProductForm from '../components/ProductForm';
 import NavBar from '../components/NavBar';
 import styles from '../components/ProductCard.module.css';
 
-
-const dummyProducts = [
-  {
-    id: 1,
-    name: 'Milk',
-    category: 'Dairy',
-    price: 2.5,
-    discount: 0.2,
-    unitsSold: 60,
-    stock: 2,
-    expiry: '2025-08-01',
-  },
-  {
-    id: 2,
-    name: 'Bread',
-    category: 'Bakery',
-    price: 1.2,
-    discount: 0,
-    unitsSold: 20,
-    stock: 10,
-    expiry: '2024-07-25',
-  },
-  {
-    id: 3,
-    name: 'Eggs',
-    category: 'Dairy',
-    price: 3.5,
-    discount: 0.1,
-    unitsSold: 100,
-    stock: 1,
-    expiry: '2024-07-28',
-  },
-];
-
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
@@ -49,7 +15,11 @@ export default function ProductsPage() {
   const isAdmin = true;
 
   useEffect(() => {
-    setProducts(dummyProducts);
+    fetch('/data/products.json')
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch((err) => console.error('Error loading products:', err));
+
     const storedCart = localStorage.getItem('cart');
     if (storedCart) {
       setCart(JSON.parse(storedCart));

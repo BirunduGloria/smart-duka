@@ -97,14 +97,23 @@ export default function ProductsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <input
-          type="text"
-          placeholder="Filter by category"
-          className="border p-2 w-1/3"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        />
-      </div>
+        <div className="w-1/3">
+  <label htmlFor="categoryFilter" className="block font-medium mb-1">Filter by Category:</label>
+  <select
+    id="categoryFilter"
+    value={selectedCategory}
+    onChange={(e) => setSelectedCategory(e.target.value)}
+    className="border p-2 w-full rounded"
+  >
+    <option value="">All</option>
+    {Array.from(new Set(products.map((p) => p.category))).map((cat, i) => (
+      <option key={i} value={cat}>
+        {cat}
+      </option>
+    ))}
+  </select>
+</div>
+</div>
 
       {editingProduct && (
         <ProductForm

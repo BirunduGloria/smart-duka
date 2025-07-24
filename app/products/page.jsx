@@ -1,9 +1,11 @@
- 'use client';
+'use client';
 import React, { useEffect, useState } from 'react';
 import ProductCard from '../components/ProductCard';
 import ProductForm from '../components/ProductForm';
-import NavBar from '../components/NavBar';  
-// Dummy product data
+import NavBar from '../components/NavBar';
+import styles from '../components/ProductCard.module.css';
+
+
 const dummyProducts = [
   {
     id: 1,
@@ -63,7 +65,6 @@ export default function ProductsPage() {
     setCart(updatedCart);
     setMessage(`${product.name} added to cart!`);
     setTimeout(() => setMessage(''), 2500);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
   const handleEdit = (product) => {
@@ -90,26 +91,26 @@ export default function ProductsPage() {
   });
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Product Catalog</h1>
+    <div className="page-container">
+      <h1 className="page-title">Product Catalog</h1>
 
-      <div className="flex gap-4 mb-4">
+      <div className="filters">
         <input
           type="text"
           placeholder="Search by name"
-          className="border p-2 w-1/3"
+          className="input"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <div className="w-1/3">
-          <label htmlFor="categoryFilter" className="block font-medium mb-1">
+        <div className="input">
+          <label htmlFor="categoryFilter" className="label">
             Filter by Category:
           </label>
           <select
             id="categoryFilter"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="border p-2 w-full rounded"
+            className="select"
           >
             <option value="">All</option>
             {Array.from(new Set(products.map((p) => p.category))).map((cat, i) => (
@@ -129,13 +130,9 @@ export default function ProductsPage() {
         />
       )}
 
-      {message && (
-        <div className="bg-green-100 text-green-800 p-2 rounded mb-4 shadow">
-          {message}
-        </div>
-      )}
+      {message && <div className="message">{message}</div>}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid">
         {filteredProducts.map((product) => (
           <ProductCard
             key={product.id}
@@ -148,11 +145,9 @@ export default function ProductsPage() {
         ))}
       </div>
 
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold">
-          🛒 Your Cart ({cart.length} items)
-        </h2>
-        <ul className="list-disc pl-6">
+      <div className="cart">
+        <h2 className="cart-title">🛒 Your Cart ({cart.length} items)</h2>
+        <ul className="cart-list">
           {cart.map((item, index) => (
             <li key={index}>
               {item.name} - ${item.price}

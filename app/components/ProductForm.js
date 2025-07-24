@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import styles from './ProductCard.module.css';
 
 export default function ProductForm({ product, onSave, onCancel }) {
   const [formData, setFormData] = useState({
@@ -51,95 +52,21 @@ export default function ProductForm({ product, onSave, onCancel }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center p-4 z-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg max-w-md w-full shadow-lg space-y-4"
-      >
-        <h2 className="text-xl font-semibold">{product ? 'Edit' : 'Add'} Product</h2>
+    <div className="modal-overlay">
+      <form onSubmit={handleSubmit} className="modal-form">
+        <h2 className="modal-title">{product ? 'Edit' : 'Add'} Product</h2>
 
-        <input
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Product Name"
-          required
-          className="w-full border rounded px-3 py-2"
-        />
+        <input name="name" value={formData.name} onChange={handleChange} placeholder="Product Name" required className="input" />
+        <input name="category" value={formData.category} onChange={handleChange} placeholder="Category" required className="input" />
+        <input type="number" name="price" value={formData.price} onChange={handleChange} placeholder="Price" min="0" step="0.01" className="input" />
+        <input type="number" name="stock" value={formData.stock} onChange={handleChange} placeholder="Stock" min="0" className="input" />
+        <input type="number" name="discount" value={formData.discount} onChange={handleChange} placeholder="Discount (%)" min="0" max="100" className="input" />
+        <input type="number" name="unitsSold" value={formData.unitsSold} onChange={handleChange} placeholder="Units Sold" min="0" className="input" />
+        <input type="date" name="expiry" value={formData.expiry} onChange={handleChange} className="input" />
 
-        <input
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-          placeholder="Category"
-          required
-          className="w-full border rounded px-3 py-2"
-        />
-
-        <input
-          type="number"
-          name="price"
-          value={formData.price}
-          onChange={handleChange}
-          placeholder="Price"
-          min="0"
-          step="0.01"
-          className="w-full border rounded px-3 py-2"
-        />
-
-        <input
-          type="number"
-          name="stock"
-          value={formData.stock}
-          onChange={handleChange}
-          placeholder="Stock"
-          min="0"
-          className="w-full border rounded px-3 py-2"
-        />
-
-        <input
-          type="number"
-          name="discount"
-          value={formData.discount}
-          onChange={handleChange}
-          placeholder="Discount (%)"
-          min="0"
-          max="100"
-          className="w-full border rounded px-3 py-2"
-        />
-
-        <input
-          type="number"
-          name="unitsSold"
-          value={formData.unitsSold}
-          onChange={handleChange}
-          placeholder="Units Sold"
-          min="0"
-          className="w-full border rounded px-3 py-2"
-        />
-
-        <input
-          type="date"
-          name="expiry"
-          value={formData.expiry}
-          onChange={handleChange}
-          className="w-full border rounded px-3 py-2"
-        />
-
-        <div className="flex justify-end gap-3 mt-4">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            {product ? 'Update' : 'Add'}
-          </button>
+        <div className="modal-actions">
+          <button type="button" onClick={onCancel} className="cancel-btn">Cancel</button>
+          <button type="submit" className="save-btn">{product ? 'Update' : 'Add'}</button>
         </div>
       </form>
     </div>

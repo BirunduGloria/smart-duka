@@ -1,7 +1,6 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './ProductCard.module.css';
-
 export default function ProductCard({
   product,
   isAdmin,
@@ -9,59 +8,56 @@ export default function ProductCard({
   onEdit,
   onDelete,
 }) {
-  const price = product.pricing?.price || 0;
-  const discount = product.pricing?.discount || 0;
-  const stock = product.inventory?.unitsInStock || 0;
-  const unitsSold = product.inventory?.unitsSold || 0;
 
   return (
-    <div className={styles.card}>
-      <h3 className={styles.title}>{product.name}</h3>
-      <p className={styles.text}>Category: {product.category}</p>
-      <p className={styles.text}>Price: ${price.toFixed(2)}</p>
-      <p className={styles.text}>Stock: {stock}</p>
+    <div className="border rounded p-4 shadow hover:shadow-lg transition relative">
+      <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+      <p className="text-sm mb-1">Category: {product.category}</p>
+      <p className="mb-1">Price: ${product.price.toFixed(2)}</p>
+      <p className="mb-1">Stock: {product.stock}</p>
 
-      <div className={styles.badgeContainer}>
-        {stock <= 2 && (
-          <span className={`${styles.badge} ${styles.badgeYellow}`}>
-            Only 2 Left!
-          </span>
-        )}
-        {stock < 15 && stock > 2 && (
-          <span className={`${styles.badge} ${styles.badgeOrange}`}>
-            Expiring Soon
-          </span>
-        )}
-        {discount > 0 && (
-          <span className={`${styles.badge} ${styles.badgePink}`}>
-            On Offer
-          </span>
-        )}
-        {unitsSold > 50 && (
-          <span className={`${styles.badge} ${styles.badgeRed}`}>
-            Selling Fast
-          </span>
-        )}
-      </div>
+      <div className="absolute top-2 right-2 flex flex-col gap-1">
+  {product.stock <= 2 && (
+    <span className="bg-yellow-300 text-xs px-2 py-1 rounded">
+      Only 2 Left!
+    </span>
+  )}
+  {product.stock < 15 && product.stock > 2 && (
+    <span className="bg-orange-300 text-xs px-2 py-1 rounded">
+      Expiring Soon
+    </span>
+  )}
+  {product.discount > 0 && (
+    <span className="bg-pink-300 text-xs px-2 py-1 rounded">
+      On Offer
+    </span>
+  )}
+  {product.unitsSold > 50 && (
+    <span className="bg-red-300 text-xs px-2 py-1 rounded">
+      Selling Fast
+    </span>
+  )}
+</div>
+
 
       <button
         onClick={() => onAddToCart(product)}
-        className={styles.button}
+        className="bg-blue-600 text-white px-3 py-1 rounded mt-2 w-full"
       >
         Add to Cart
       </button>
 
       {isAdmin && (
-        <div className={styles.adminButtons}>
+        <div className="flex gap-2 mt-3">
           <button
             onClick={() => onEdit(product)}
-            className={styles.editBtn}
+            className="bg-green-500 text-white px-3 py-1 rounded flex-grow"
           >
             Edit
           </button>
           <button
             onClick={() => onDelete(product.id)}
-            className={styles.deleteBtn}
+            className="bg-red-600 text-white px-3 py-1 rounded flex-grow"
           >
             Delete
           </button>

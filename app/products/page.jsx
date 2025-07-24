@@ -1,130 +1,149 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import ProductCard from './ProductCard';
-import ProductForm from './ProductForm';
-import NavBar from './NavBar';
-import styles from '../components/ProductCard.module.css';
+import React, { useState, useEffect } from 'react';
 
-export default function ProductsPage() {
-  const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [message, setMessage] = useState('');
-  const isAdmin = true;
-
-  useEffect(() => {
-    fetch('/data/products.json')
-      .then((res) => res.json())
-      .then((data) => setProducts(data))
-      .catch((err) => console.error('Error loading products:', err));
-
-    const storedCart = localStorage.getItem('cart');
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
-
-  const handleAddToCart = (product) => {
-    const updatedCart = [...cart, product];
-    setCart(updatedCart);
-    setMessage(`${product.name} added to cart!`);
-    setTimeout(() => setMessage(''), 2500);
-  };
-
-  const handleEdit = (product) => {
-    setEditingProduct(product);
-  };
-
-  const handleDelete = (id) => {
-    setProducts(products.filter((p) => p.id !== id));
-  };
-
-  const handleSave = (updatedProduct) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-    );
-    setEditingProduct(null);
-  };
-
-  const filteredProducts = products.filter((p) => {
-    const nameMatch = p.name.toLowerCase().includes(search.toLowerCase());
-    const categoryMatch = selectedCategory
-      ? p.category.toLowerCase().includes(selectedCategory.toLowerCase())
-      : true;
-    return nameMatch && categoryMatch;
+export default function ProductForm({ product, onSave, onCancel }) {
+  const [formData, setFormData] = useState({
+    id: null,
+    name: '',
+    category: '',
+    image: '',
+    pricing: {
+      price: 0,
+      discount: 0,
+    },
+    inventory: {
+      unitsInStock: 0,
+      unitsSold: 0,
+    },
+    expiryDate: '',
   });
 
+  useEffect(() => {
+    if (product) {
+      setFormData(product);
+    }
+  }, [product]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === 'price' || name === 'discount') {
+      setFormData((prev) => ({
+        ...prev,
+        pricing: {
+          ...prev.pricing,
+          [name]: Number(value),
+        },
+      }));
+    } else if (name === 'unitsInStock' || name === 'unitsSold') {
+      setFormData((prev) => ({
+        ...prev,
+        inventory: {
+          ...prev.inventory,
+          [name]: Number(value),
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!formData.name.trim() || !formData.category.trim()) {
+      alert('Name and Category are required');
+      return;
+    }
+
+    onSave(formData);
+  };
+
   return (
-    <div className="page-container">
-      <h1 className="page-title">Product Catalog</h1>
+    <div className="modal-backdrop">
+      <form onSubmit={handleSubmit} className="product-form">
+        <h2>{product ? 'Edit' : 'Add'} Product</h2>
 
-      <div className="filters">
         <input
-          type="text"
-          placeholder="Search by name"
-          className="input"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="Product Name"
+          required
+          className="form-input"
         />
-        <div className="input">
-          <label htmlFor="categoryFilter" className="label">
-            Filter by Category:
-          </label>
-          <select
-            id="categoryFilter"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="select"
-          >
-            <option value="">All</option>
-            {Array.from(new Set(products.map((p) => p.category))).map((cat, i) => (
-              <option key={i} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+
+        <input
+          name="category"
+          value={formData.category}
+          onChange={handleChange}
+          placeholder="Category"
+          required
+          className="form-input"
+        />
+
+        <input
+          type="number"
+          name="price"
+          value={formData.pricing.price}
+          onChange={handleChange}
+          placeholder="Price"
+          min="0"
+          step="0.01"
+          className="form-input"
+        />
+
+        <input
+          type="number"
+          name="unitsInStock"
+          value={formData.inventory.unitsInStock}
+          onChange={handleChange}
+          placeholder="Units in Stock"
+          min="0"
+          className="form-input"
+        />
+
+        <input
+          type="number"
+          name="discount"
+          value={formData.pricing.discount}
+          onChange={handleChange}
+          placeholder="Discount (%)"
+          min="0"
+          max="100"
+          className="form-input"
+        />
+
+        <input
+          type="number"
+          name="unitsSold"
+          value={formData.inventory.unitsSold}
+          onChange={handleChange}
+          placeholder="Units Sold"
+          min="0"
+          className="form-input"
+        />
+
+        <input
+          type="date"
+          name="expiryDate"
+          value={formData.expiryDate}
+          onChange={handleChange}
+          className="form-input"
+        />
+
+        <div className="button-group">
+          <button type="button" onClick={onCancel} className="cancel-button">
+            Cancel
+          </button>
+          <button type="submit" className="submit-button">
+            {product ? 'Update' : 'Add'}
+          </button>
         </div>
-      </div>
-
-      {editingProduct && (
-        <ProductForm
-          product={editingProduct}
-          onSave={handleSave}
-          onCancel={() => setEditingProduct(null)}
-        />
-      )}
-
-      {message && <div className="message">{message}</div>}
-
-      <div className="grid">
-        {filteredProducts.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            isAdmin={isAdmin}
-            onAddToCart={handleAddToCart}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
-
-      <div className="cart">
-        <h2 className="cart-title">🛒 Your Cart ({cart.length} items)</h2>
-        <ul className="cart-list">
-          {cart.map((item, index) => (
-            <li key={index}>
-              {item.name} - ${item.price}
-            </li>
-          ))}
-        </ul>
-      </div>
+      </form>
     </div>
   );
 }

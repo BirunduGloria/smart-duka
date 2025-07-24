@@ -17,7 +17,6 @@ export default function Home() {
   };
 
   const allProducts = [
-    // ... (your 10 products unchanged)
     {
       id: 1,
       name: 'Product A',
@@ -108,16 +107,15 @@ export default function Home() {
       inventory: { unitsSold: 110, unitsInStock: 2 },
       expiryDate: '2025-07-26',
     },
-     {
+    {
       id: 11,
-      name: 'Product k',
+      name: 'Product K',
       category: 'Clothing',
       image: 'https://via.placeholder.com/150',
       pricing: { price: 350, discount: 0 },
       inventory: { unitsSold: 110, unitsInStock: 6 },
       expiryDate: '2025-07-26',
     },
-    
   ];
 
   const handleSearch = (searchTerm) => {
@@ -134,7 +132,6 @@ export default function Home() {
   };
 
   return (
-
     <>
       <NavBar>
         <SearchBar onSearch={handleSearch} />
@@ -142,7 +139,7 @@ export default function Home() {
 
       <main className="main-container">
         <div className="header-section standout-header">
-          <h1>Welcome to E-Shop</h1>
+          <h1>Welcome to Smart-Duka</h1>
           <div className="currency-selector">
             <label>Currency:</label>
             <select value={currency} onChange={(e) => setCurrency(e.target.value)}>

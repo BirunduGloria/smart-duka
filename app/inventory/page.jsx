@@ -10,11 +10,11 @@ function InventoryPage() {
   const { user } = useContext(UserContext);
   const router = useRouter();
 
-  {/*useEffect(() => {
+  useEffect(() => {
     if (!user || user.role !== 'admin') {
       router.push('/');
     }
-  }, []);*/}
+  }, []);
 
   return (
     <div className="inventory-wrapper">

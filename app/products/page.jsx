@@ -24,8 +24,20 @@ export default function ProductForm({ product, onSave, onCancel }) {
     }
   }, [product]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
+
+  const handleAddToCart = (product) => {
+    const updatedCart = [...cart, product];
+    setCart(updatedCart);
+    setMessage(`${product.name} added to cart!`);
+
+    setTimeout(() => setMessage(''), 2500);
+
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  };
+
 
     if (name === 'price' || name === 'discount') {
       setFormData((prev) => ({
@@ -85,6 +97,29 @@ export default function ProductForm({ product, onSave, onCancel }) {
           className="form-input"
         />
 
+        <div className="w-1/3">
+ 
+          <label htmlFor="categoryFilter" className="block font-medium mb-1">
+            Filter by Category:
+          </label>
+
+          <select
+            id="categoryFilter"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="border p-2 w-full rounded"
+          >
+            <option value="">All</option>
+            {Array.from(new Set(products.map((p) => p.category))).map((cat, i) => (
+              <option key={i} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+
         <input
           type="number"
           name="price"
@@ -143,7 +178,37 @@ export default function ProductForm({ product, onSave, onCancel }) {
             {product ? 'Update' : 'Add'}
           </button>
         </div>
-      </form>
+
+      )}
+
+
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {filteredProducts.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            isAdmin={isAdmin}
+            onAddToCart={handleAddToCart}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ))}
+      </div>
+
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold">
+          🛒 Your Cart ({cart.length} items)
+        </h2>
+        <ul className="list-disc pl-6">
+          {cart.map((item, index) => (
+            <li key={index}>
+              {item.name} - ${item.price}
+            </li>
+          ))}
+        </ul>
+      </div>
+
     </div>
   );
 }

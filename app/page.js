@@ -10,7 +10,7 @@ export default function Home() {
   const conversionRate = 150; // 1 USD = 150 KES
 
   const products = [
-    { id: 1, name: 'Product A', price: 200, discount: true, unitsSold: 120, stock: 3, expiresSoon: false, image: 'https://via.placeholder.com/150' },
+    { id: 1, name: 'Product A', price: 200, discount: true, unitsSold: 120, stock: 3, expiresSoon: false, image: 'https://placehold.co/600x400' },
     { id: 2, name: 'Product B', price: 500, discount: false, unitsSold: 60, stock: 10, expiresSoon: true, image: 'https://via.placeholder.com/150' },
     { id: 3, name: 'Product C', price: 150, discount: true, unitsSold: 20, stock: 2, expiresSoon: false, image: 'https://via.placeholder.com/150' },
     { id: 4, name: 'Product D', price: 300, discount: false, unitsSold: 55, stock: 8, expiresSoon: false, image: 'https://via.placeholder.com/150' },
@@ -49,7 +49,7 @@ export default function Home() {
         </div>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">featured products</h2>
+          <h2 className="text-xl font-semibold mb-3">Featured Products</h2>
           <ul className="grid grid-cols-2 gap-4">
             {products.filter(p => p.discount).map(product => (
               <li key={product.id} className="bg-white p-4 rounded shadow">
@@ -62,7 +62,7 @@ export default function Home() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">fast selling products</h2>
+          <h2 className="text-xl font-semibold mb-3">Fast Selling Products</h2>
           <ul className="grid grid-cols-2 gap-4">
             {products.filter(p => p.unitsSold > 50).map(product => (
               <li key={product.id} className="bg-white p-4 rounded shadow">
@@ -76,7 +76,7 @@ export default function Home() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">smart stock alerts</h2>
+          <h2 className="text-xl font-semibold mb-3">Smart Stock Alerts</h2>
           <ul className="list-disc ml-6 text-sm text-red-600">
             {products.filter(p => p.stock < 5).map(product => (
               <li key={product.id}>
@@ -88,7 +88,7 @@ export default function Home() {
 
         {isAdmin && (
           <section>
-            <h2 className="text-xl font-semibold mb-3">expiring soon</h2>
+            <h2 className="text-xl font-semibold mb-3">Expiring Soon</h2>
             <ul className="list-disc ml-6 text-sm text-orange-500">
               {products.filter(p => p.expiresSoon).map(product => (
                 <li key={product.id}>

@@ -13,33 +13,5 @@
       "unitsSold": 60
     },
     "expiryDate": "2025-08-01"
-  },
-  {
-    "id": 2,
-    "name": "Bread",
-    "category": "Bakery",
-    "pricing": {
-      "price": 1.2,
-      "discount": 0
-    },
-    "inventory": {
-      "unitsInStock": 10,
-      "unitsSold": 20
-    },
-    "expiryDate": "2026-07-25"
-  },
-  {
-    "id": 3,
-    "name": "Eggs",
-    "category": "Dairy",
-    "pricing": {
-      "price": 3.5,
-      "discount": 0.1
-    },
-    "inventory": {
-      "unitsInStock": 1,
-      "unitsSold": 100
-    },
-    "expiryDate": "2026-07-28"
   }
 ]

@@ -1,6 +1,26 @@
 'use client';
 
-import inventoryData from '../../data/products.json';
+import inventoryData from '../data/products.json'; 
+
+export default function InventoryList() {
+  return (
+    <ul className="inventory-list">
+      {inventoryData.map(({ id, name, category, pricing, inventory, expiryDate }) => {
+        const discounted = pricing.price - pricing.discount;
+        return (
+          <li key={id}>
+            <strong>{name}</strong> — {category}<br />
+            Price: Ksh {pricing.price} → {discounted}<br />
+            Stock: {inventory.unitsInStock} | Sold: {inventory.unitsSold}<br />
+            Expiry: {expiryDate}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+{/*import inventoryData from '../../data/products.json';
 
 export default function InventoryList() {
   return (
@@ -25,3 +45,4 @@ export default function InventoryList() {
     </ul>
   );
 }
+*/}

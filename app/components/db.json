@@ -1,0 +1,15 @@
+{
+  "cart": [
+    { "id": 1, "name": "Sugar", "price": 100, "quantity": 2 }
+  ],
+  "sales": []
+}
+{
+  "products": [
+    { "id": 1, "name": "Sugar", "price": 100, "quantity": 50 },
+    { "id": 2, "name": "Rice", "price": 200, "quantity": 30 }
+  ],
+  "users": [
+    { "id": 1, "username": "admin", "password": "admin" }
+  ]
+}

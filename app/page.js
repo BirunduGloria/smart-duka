@@ -51,7 +51,7 @@ export default function Home() {
   const allProducts = [
     {
       id: 1, name: 'Product A', category: 'Beverages',
-      image: 'https://placehold.co/600x400', pricing: { price: 200, discount: 0.1 },
+      image: 'https://www.pinterest.com/pin/6192518230319432/', pricing: { price: 200, discount: 0.1 },
       inventory: { unitsSold: 120, unitsInStock: 3 }, expiryDate: '2025-07-30'
     },
     {

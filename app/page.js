@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import NavBar from '../app/components/NavBar';
+import './globals.css';
+
 
 export default function Home() {
   const isAdmin = true;
@@ -32,13 +34,12 @@ export default function Home() {
   return (
     <>
       <NavBar />
-      <main className="pt-24 px-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold"></h1>
-          <div>
-            <label className="mr-2 text-gray-600">currency:</label>
+      <main className="main-container">
+        <div className="header-section standout-header">
+          <h1>Welcome to E-Shop</h1>
+          <div className="currency-selector">
+            <label>currency:</label>
             <select
-              className="border px-2 py-1 rounded"
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
             >
@@ -48,51 +49,54 @@ export default function Home() {
           </div>
         </div>
 
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">Featured Products</h2>
-          <ul className="grid grid-cols-2 gap-4">
+        <section className="section standout-section">
+          <h2>Featured Products</h2>
+          <ul className="product-grid standout-grid">
             {products.filter(p => p.discount).map(product => (
-              <li key={product.id} className="bg-white p-4 rounded shadow">
-                <img src={product.image} alt={product.name} className="w-full h-32 object-cover rounded mb-2" />
-                <p className="font-medium">{product.name}</p>
-                <p className="text-sm text-gray-600">{formatPrice(product.price)}</p>
+              <li key={product.id} className="product-card standout-card">
+                <div className="image-container">
+                  <img src={product.image} alt={product.name} />
+                  <span className="discount-badge">Discount</span>
+                </div>
+                <p className="product-name">{product.name}</p>
+                <p className="product-price">{formatPrice(product.price)}</p>
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">Fast Selling Products</h2>
-          <ul className="grid grid-cols-2 gap-4">
+        <section className="section standout-section">
+          <h2>Fast Selling Products</h2>
+          <ul className="product-grid standout-grid">
             {products.filter(p => p.unitsSold > 50).map(product => (
-              <li key={product.id} className="bg-white p-4 rounded shadow">
-                <img src={product.image} alt={product.name} className="w-full h-32 object-cover rounded mb-2" />
-                <p className="font-medium">{product.name}</p>
-                <p className="text-sm text-gray-600">{formatPrice(product.price)}</p>
-                <p className="text-xs text-gray-500">{product.unitsSold} units sold</p>
+              <li key={product.id} className="product-card standout-card">
+                <img src={product.image} alt={product.name} />
+                <p className="product-name">{product.name}</p>
+                <p className="product-price">{formatPrice(product.price)}</p>
+                <p className="product-units">{product.unitsSold} units sold</p>
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">Smart Stock Alerts</h2>
-          <ul className="list-disc ml-6 text-sm text-red-600">
+        <section className="section standout-section">
+          <h2>Smart Stock Alerts</h2>
+          <ul className="alert-list standout-alert">
             {products.filter(p => p.stock < 5).map(product => (
               <li key={product.id}>
-                {product.name} - only {product.stock} left
+                <span className="product-name">{product.name}</span> - only {product.stock} left
               </li>
             ))}
           </ul>
         </section>
 
         {isAdmin && (
-          <section>
-            <h2 className="text-xl font-semibold mb-3">Expiring Soon</h2>
-            <ul className="list-disc ml-6 text-sm text-orange-500">
+          <section className="section standout-section">
+            <h2>Expiring Soon</h2>
+            <ul className="alert-list standout-alert expiring">
               {products.filter(p => p.expiresSoon).map(product => (
                 <li key={product.id}>
-                  {product.name} - expiring soon
+                  <span className="product-name">{product.name}</span> - expiring soon
                 </li>
               ))}
             </ul>

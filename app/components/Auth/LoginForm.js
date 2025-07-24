@@ -31,7 +31,8 @@ function LoginForm() {
     localStorage.setItem('user', JSON.stringify(loggedInUser));
     setUser(loggedInUser);
 
-    router.push(isAdmin ? '/inventory' : '/dashboard');
+    router.push('/');
+
   };
 
   return (

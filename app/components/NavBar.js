@@ -2,7 +2,7 @@
 
 import { useContext } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserContext } from '../../context/UserContext';
+import { UserContext } from '.././context/UserContext.js';
 import Link from "next/link";
 import SearchBar from "./SearchBar";
 import "../globals.css";
@@ -26,6 +26,7 @@ export default function NavBar({ onSearch }) {
         <li><Link href="/">Home</Link></li>
         <li><Link href="/Products">products</Link></li>
         <li><Link href="/cart">Cart</Link></li>
+        <li><Link href="/login">Login</Link></li>
 
         {user?.role === 'admin' && (
           <li><Link href="/inventory">Inventory</Link></li>

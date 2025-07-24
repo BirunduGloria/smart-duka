@@ -11,27 +11,18 @@
       "name": "Bread",
       "price": 80,
       "quantity": 1
-    }
-  ],
-  "sales": [
+    },
     {
-      "id": "bd80",
-      "items": [
-        {
-          "id": 1,
-          "name": "Fresh Milk",
-          "price": 100,
-          "quantity": 2
-        },
-        {
-          "id": 2,
-          "name": "Bread",
-          "price": 80,
-          "quantity": 1
-        }
-      ],
-      "date": "2025-07-24T11:06:09.257Z",
-      "total": 280
+      "id": 3,
+      "name": "Fresh Milk",
+      "price": 100,
+      "quantity": 2
+    },
+    {
+      "id": 4,
+      "name": "Bread",
+      "price": 80,
+      "quantity": 1
     }
   ]
 }

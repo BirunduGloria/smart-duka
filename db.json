@@ -1,4 +1,11 @@
 {
-  "cart": [],
+  "cart": [
+    {
+      "id": 1,
+      "name": "Item A",
+      "quantity": 2,
+      "price": 500
+    }
+  ],
   "sales": []
 }

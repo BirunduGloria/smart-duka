@@ -11,24 +11,6 @@
       "name": "Bread",
       "price": 80,
       "quantity": 1
-    },
-    {
-      "id": "0551",
-      "name": "Fresh Milk",
-      "price": 100,
-      "quantity": 2
-    },
-    {
-      "id": "56b0",
-      "name": "Fresh Milk",
-      "price": 100,
-      "quantity": 2
-    },
-    {
-      "id": "55ba",
-      "name": "Bread",
-      "price": 80,
-      "quantity": 1
     }
   ],
   "sales": [
@@ -203,6 +185,29 @@
         }
       ],
       "date": "2025-07-25T02:46:49.062Z",
+      "total": 6.2
+    },
+    {
+      "id": "a667",
+      "items": [
+        {
+          "id": 1,
+          "name": "Milk",
+          "price": 2.5,
+          "quantity": 2,
+          "category": "Food",
+          "image": "https://i.pinimg.com/736x/79/81/eb/7981ebddff2991fd734b6390a58daeb1.jpg"
+        },
+        {
+          "id": 2,
+          "name": "Bread",
+          "price": 1.2,
+          "quantity": 1,
+          "category": "Food",
+          "image": "https://i.pinimg.com/736x/7f/ce/7a/7fce7afbf66cf7fa520a560eb50a6e8f.jpg"
+        }
+      ],
+      "date": "2025-07-25T03:21:34.407Z",
       "total": 6.2
     }
   ]

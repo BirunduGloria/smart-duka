@@ -13,6 +13,7 @@ function Cart() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currency, setCurrency] = useState("KES");
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     loadData();
@@ -28,18 +29,23 @@ function Cart() {
 
       if (!cartRes.ok || !salesRes.ok) throw new Error("Failed to fetch");
 
-      const cartData = await cartRes.json();
-      const salesData = await salesRes.json();
+      const cartDataRaw = await cartRes.json();
+      const salesDataRaw = await salesRes.json();
+
+      // Ensure arrays
+      const cartData = Array.isArray(cartDataRaw) ? cartDataRaw : [];
+      const salesData = Array.isArray(salesDataRaw) ? salesDataRaw : [];
 
       // Enrich cart items with product info from local products.json
       const mergedCart = cartData.map(cartItem => {
-        const product = products.find(p => p.id === cartItem.productId || p.id === cartItem.id);
-        // Always use a number for price, fallback to 0
-        const price = product?.pricing?.price ?? product?.price ?? cartItem.price ?? 0;
+        const product = products.find(p => p.id === cartItem.productId || p.id === cartItem.id) || {};
+        const price = product.pricing?.price ?? product.price ?? cartItem.price ?? 0;
         return {
           ...cartItem,
-          name: product?.name || cartItem.name || "Unknown",
-          price: Number(price)
+          name: product.name || cartItem.name || "Unknown",
+          price: Number(price),
+          category: product.category || "N/A",
+          image: product.image || ""
         };
       });
 
@@ -83,6 +89,7 @@ function Cart() {
   };
 
   const handleRemoveItem = async (id) => {
+    if (!window.confirm("Are you sure you want to remove this item from the cart?")) return;
     try {
       const res = await fetch(`${API}/cart/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Delete failed");
@@ -136,7 +143,7 @@ function Cart() {
     try {
       await Promise.all(
         items.map(async item => {
-          const existing = cartItems.find(i => i.productId === item.productId);
+          const existing = cartItems.find(i => i.productId === item.productId || i.id === item.productId);
           if (existing) {
             await fetch(`${API}/cart/${existing.id}`, {
               method: "PATCH",
@@ -155,10 +162,12 @@ function Cart() {
       );
 
       loadData();
-      alert("Items reordered");
+      setToast("Items reordered successfully!");
+      setTimeout(() => setToast(""), 2500);
     } catch (err) {
       console.error(err);
-      alert("Reorder failed");
+      setToast("Reorder failed");
+      setTimeout(() => setToast(""), 2500);
     }
   };
 
@@ -219,12 +228,16 @@ function Cart() {
                 <li key={item.id} style={{ border: '1px solid #ddd', padding: 16, borderRadius: 8, marginBottom: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                     {/* Product Image */}
-                    {product?.image && (
-                      <img src={product.image} alt={item.name} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, border: '1px solid #eee', marginRight: 12 }} />
+                    {item.image ? (
+                      <img src={item.image} alt={item.name || 'Product'} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, border: '1px solid #eee', marginRight: 12 }} />
+                    ) : (
+                      <div style={{ width: 60, height: 60, background: '#eee', borderRadius: 8, marginRight: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: 24 }}>
+                        ?
+                      </div>
                     )}
                     <div style={{ flex: 1 }}>
-                      <h4 style={{ fontWeight: '500', margin: 0 }}>{item.name}</h4>
-                      <p style={{ margin: '2px 0 0 0', fontSize: 13, color: '#555' }}>Category: {product?.category || 'N/A'}</p>
+                      <h4 style={{ fontWeight: '500', margin: 0 }}>{item.name || 'Unknown'}</h4>
+                      <p style={{ margin: '2px 0 0 0', fontSize: 13, color: '#555' }}>Category: {item.category || 'N/A'}</p>
                       <p style={{ margin: 0 }}>{currencySymbol} {convert(item.price)} each</p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -299,15 +312,30 @@ function Cart() {
                 </div>
               </div>
               <ul style={{ fontSize: 13, color: '#444', marginLeft: 12, paddingLeft: 0 }}>
-                {sale.items.map((item, idx) => (
-                  <li key={idx} style={{ marginBottom: 2 }}>
-                    {item.name} x {item.quantity} — {currencySymbol} {convert(item.price * item.quantity)}
-                  </li>
-                ))}
+                {sale.items.map((item, idx) => {
+                  const product = products.find(p => p.id === item.productId || p.id === item.id) || {};
+                  return (
+                    <li key={idx} style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {product.image ? (
+                        <img src={product.image} alt={item.name || 'Product'} style={{ width: 32, height: 32, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee', marginRight: 8 }} />
+                      ) : (
+                        <div style={{ width: 32, height: 32, background: '#eee', borderRadius: 4, marginRight: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: 16 }}>?</div>
+                      )}
+                      <span style={{ fontWeight: 500 }}>{item.name || 'Unknown'}</span>
+                      <span style={{ color: '#888', fontSize: 12 }}>({product.category || item.category || 'N/A'})</span>
+                      <span style={{ marginLeft: 'auto' }}>{currencySymbol} {convert(item.price * item.quantity)}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </li>
           ))}
         </ul>
+      )}
+      {toast && (
+        <div style={{ position: 'fixed', top: 24, right: 24, background: '#333', color: 'white', padding: '12px 24px', borderRadius: 8, zIndex: 1000, fontSize: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+          {toast}
+        </div>
       )}
       <style>{`
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

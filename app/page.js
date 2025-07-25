@@ -11,8 +11,8 @@ export default function Home() {
   const [cartCount, setCartCount] = useState(0);
   const conversionRate = 150;
 
-  const today = new Date();
   const daysFromToday = (dateStr) => {
+    const today = new Date();
     const expiry = new Date(dateStr);
     return (expiry - today) / (1000 * 60 * 60 * 24);
   };

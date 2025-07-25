@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserContext } from '../context/UserContext';
+import Home from '../page';
 import NavBar from '.././components/NavBar';
 
 
@@ -35,9 +36,8 @@ export default function AdminPage() {
 
   return (
     <div className="p-6">
-      <NavBar />
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-      <p>Welcome back, {user?.email} </p>
+      <h1>Admin Dashboard</h1>
+      <Home />
     </div>
   );
 }

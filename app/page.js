@@ -18,11 +18,12 @@ function Home() {
     setToday(new Date());
   }, []);
 
-  const daysFromToday = (dateStr) => {
-    if (!today) return Infinity;
-    const expiry = new Date(dateStr);
-    return (expiry - today) / (1000 * 60 * 60 * 24);
-  };
+ const daysFromToday = (dateStr) => {
+  if (!today) return Infinity;
+  const expiry = new Date(dateStr);
+  return (expiry - today) / (1000 * 60 * 60 * 24);
+};
+    
 
   const loadCart = () => {
     if (typeof window === 'undefined') return [];

@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smart POS System
+
+A modern Point of Sale (POS) web application built with Next.js. This app features inventory management, user authentication, and a responsive, user-friendly interface.
+Designed for small retail setups and duka owners, it supports inventory tracking, role-based access control, and admin-exclusive functionalities.
+
+## Features
+- User authentication (login/logout)
+- Inventory management (add, edit, inline edit, and view products)
+- Responsive design with card-like and table layouts
+- Product search and filtering
+
+## Preview
+<img width="1600" height="1000" alt="image" src="https://github.com/user-attachments/assets/0a3ef35b-87ec-4f30-a902-0fd4053fe396" />
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js (v16 or later recommended)
+- npm or yarn
+- Git
 
+### Installation
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repo-url>
+   cd smart-duka
+   ```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+### Running the App
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
+View app on vercel
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Project Structure
+📦app/
+ ┣ 📄 layout.js         # Root layout shared across routes
+ ┣ 📄 page.js           # Landing page
+ ┣ 📁 components/       # UI components like ProductCard, InventoryList
+ ┣ 📁 context/          # UserContext and Provider logic
+ ┣ 📁 data/             # Static product data in JSON format
+ ┣ 📁 inventory/        # Admin-only inventory views
+📦public/               # Static assets (images, icons)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Inventory Data
+- Product data is stored in `public/data/products.json`.
+- For demo purposes, changes to inventory are in-memory only (not persisted to disk).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Admin Access
+- Only users with the `admin` role can access inventory management features.
+- You can adjust user roles in the context or authentication logic as needed.
 
-## Learn More
+### Author
+1. Gloria Birindu
+2. Peter Munyambu
+3. Gideon Kimaiyo
+4. Ashington Munene
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+[MIT](LICENSE)

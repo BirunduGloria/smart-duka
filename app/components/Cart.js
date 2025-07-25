@@ -1,166 +1,173 @@
-import React, { useState, useEffect, useCallback } from "react";
-import NavBar from '../components/NavBar';
+import React, { useState, useEffect } from "react";
+import productsDataRaw from "../data/products.json";
+import NavBar from "../components/NavBar";
+
+const API = "http://localhost:3003";
+const CONVERSION_RATE = 160; // 1 USD = 160 KES
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
+  // Flatten productsDataRaw in case it's nested
+  const products = Array.isArray(productsDataRaw[0]) ? productsDataRaw[0] : productsDataRaw;
   const [sales, setSales] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API = "http://localhost:3003";
+  const [currency, setCurrency] = useState("KES");
+  const [toast, setToast] = useState("");
 
-  // Fetch data with error handling
-  const fetchData = useCallback(async () => {
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
     try {
       setIsLoading(true);
-      setError(null);
-      
-      const [cartResponse, salesResponse] = await Promise.all([
+      const [cartRes, salesRes] = await Promise.all([
         fetch(`${API}/cart`),
         fetch(`${API}/sales`)
       ]);
-      
-      if (!cartResponse.ok || !salesResponse.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      
-      const [cartData, salesData] = await Promise.all([
-        cartResponse.json(),
-        salesResponse.json()
-      ]);
-      
-      setCartItems(cartData);
+
+      if (!cartRes.ok || !salesRes.ok) throw new Error("Failed to fetch");
+
+      const cartDataRaw = await cartRes.json();
+      const salesDataRaw = await salesRes.json();
+
+      // Ensure arrays
+      const cartData = Array.isArray(cartDataRaw) ? cartDataRaw : [];
+      const salesData = Array.isArray(salesDataRaw) ? salesDataRaw : [];
+
+      // Enrich cart items with product info from local products.json
+      const mergedCart = cartData.map(cartItem => {
+        const product = products.find(p => p.id === cartItem.productId || p.id === cartItem.id) || {};
+        const price = product.pricing?.price ?? product.price ?? cartItem.price ?? 0;
+        return {
+          ...cartItem,
+          name: product.name || cartItem.name || "Unknown",
+          price: Number(price),
+          category: product.category || "N/A",
+          image: product.image || ""
+        };
+      });
+
+      setCartItems(mergedCart);
       setSales(salesData);
     } catch (err) {
-      setError(err.message);
-      console.error("Fetch error:", err);
+      console.error(err);
+      setError("Failed to load data");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const handleQuantityChange = async (id, value) => {
+    const newQuantity = parseInt(value);
+    if (isNaN(newQuantity) || newQuantity < 1) return;
 
-  // Update quantity of an item in cart
-  const handleQuantityChange = async (id, newQuantity) => {
-    if (newQuantity < 1) return;
-    
     try {
-      const response = await fetch(`${API}/cart/${id}`, {
+      const res = await fetch(`${API}/cart/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ quantity: newQuantity })
       });
-      
-      if (!response.ok) throw new Error('Failed to update quantity');
-      
-      const updated = await response.json();
-      setCartItems(prev => prev.map(item => item.id === id ? updated : item));
+
+      if (!res.ok) throw new Error("Failed to update quantity");
+
+      const updatedItem = await res.json();
+
+      const product = products.find(p => p.id === updatedItem.productId);
+      setCartItems(prev =>
+        prev.map(item =>
+          item.id === id
+            ? { ...updatedItem, name: product?.name, price: product?.price }
+            : item
+        )
+      );
     } catch (err) {
-      setError(err.message);
-      console.error("Update error:", err);
+      console.error(err);
+      setError("Could not update quantity");
     }
   };
 
-  // Remove item from cart
   const handleRemoveItem = async (id) => {
+    if (!window.confirm("Are you sure you want to remove this item from the cart?")) return;
     try {
-      const response = await fetch(`${API}/cart/${id}`, { 
-        method: "DELETE" 
-      });
-      
-      if (!response.ok) throw new Error('Failed to remove item');
-      
+      const res = await fetch(`${API}/cart/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+
       setCartItems(prev => prev.filter(item => item.id !== id));
     } catch (err) {
-      setError(err.message);
-      console.error("Delete error:", err);
+      console.error(err);
+      setError("Could not remove item");
     }
   };
 
-  // Checkout: Save to /sales and clear cart
   const handleCheckout = async () => {
-    if (cartItems.length === 0) {
-      alert("Your cart is empty. Add some items before checkout.");
-      return;
-    }
+    if (cartItems.length === 0) return alert("Cart is empty");
+
+    const total = cartItems.reduce(
+      (sum, item) => sum + item.price * (item.quantity || 1),
+      0
+    );
+
+    const sale = {
+      items: cartItems,
+      date: new Date().toISOString(),
+      total
+    };
 
     try {
-      const total = cartItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-      );
-
-      const newSale = {
-        items: cartItems,
-        date: new Date().toISOString(),
-        total
-      };
-
-      const response = await fetch(`${API}/sales`, {
+      const res = await fetch(`${API}/sales`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newSale)
+        body: JSON.stringify(sale)
       });
-      
-      if (!response.ok) throw new Error('Checkout failed');
-      
-      const savedSale = await response.json();
-      
-      // Clear cart on server in parallel
+
+      if (!res.ok) throw new Error("Checkout failed");
+
       await Promise.all(
-        cartItems.map(item => 
+        cartItems.map(item =>
           fetch(`${API}/cart/${item.id}`, { method: "DELETE" })
         )
       );
-      
-      alert("Checkout successful! Thank you for your purchase.");
-      setSales(prev => [...prev, savedSale]);
+
+      alert("Checkout complete");
       setCartItems([]);
+      setSales(prev => [...prev, sale]);
     } catch (err) {
-      setError(err.message);
-      console.error("Checkout error:", err);
-      alert("Checkout failed. Please try again.");
+      console.error(err);
+      alert("Checkout failed");
     }
   };
 
-  // Reorder: Add sale items back to cart
   const handleReorder = async (items) => {
     try {
       await Promise.all(
         items.map(async item => {
-          const existing = cartItems.find(i => i.id === item.id);
+          const existing = cartItems.find(i => i.productId === item.productId || i.id === item.productId);
           if (existing) {
-            // Update quantity if already in cart
-            const updatedQuantity = existing.quantity + item.quantity;
-            await fetch(`${API}/cart/${item.id}`, {
+            await fetch(`${API}/cart/${existing.id}`, {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ quantity: updatedQuantity })
+              body: JSON.stringify({ quantity: existing.quantity + item.quantity })
             });
           } else {
-            // Add new item to cart
-            const { id, ...newItem } = item; // remove id to let server assign new one
+            const { id, name, price, ...cartOnlyItem } = item;
             await fetch(`${API}/cart`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(newItem)
+              body: JSON.stringify(cartOnlyItem)
             });
           }
         })
       );
-      
-      // Refresh cart
-      const response = await fetch(`${API}/cart`);
-      if (!response.ok) throw new Error('Failed to refresh cart');
-      setCartItems(await response.json());
-      
-      alert("Items have been added to your cart!");
+
+      loadData();
+      setToast("Items reordered successfully!");
+      setTimeout(() => setToast(""), 2500);
     } catch (err) {
-      setError(err.message);
-      console.error("Reorder error:", err);
-      alert("Failed to reorder items. Please try again.");
+      console.error(err);
+      setToast("Reorder failed");
+      setTimeout(() => setToast(""), 2500);
     }
   };
 
@@ -169,136 +176,170 @@ function Cart() {
     0
   );
 
-  if (isLoading) {
-    return (
-      <div className="p-4 max-w-3xl mx-auto">
-        <NavBar />
-        <div className="text-center py-8">Loading your cart...</div>
-      </div>
-    );
-  }
+  // Currency conversion helper
+  const convert = (priceKES) =>
+    currency === "KES"
+      ? Number(priceKES).toFixed(2)
+      : (Number(priceKES) / CONVERSION_RATE).toFixed(2);
+  const currencySymbol = currency === "KES" ? "KES" : "USD";
 
-  if (error) {
-    return (
-      <div className="p-4 max-w-3xl mx-auto">
-        <NavBar />
-        <div className="text-red-500 p-4 bg-red-50 rounded">
-          Error: {error}
-          <button 
-            onClick={fetchData}
-            className="ml-4 bg-blue-500 text-white px-3 py-1 rounded"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Debug: log currency state
+  console.log("Currency:", currency);
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <div style={{ padding: '16px', maxWidth: '700px', margin: '0 auto' }}>
       <NavBar />
-      <h2 className="text-2xl font-bold mb-4">🛒 Your Shopping Cart</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h2 style={{ fontSize: '2rem', fontWeight: 'bold' }}>🛒 Your Cart</h2>
+        <div>
+          <label style={{ marginRight: 8, fontWeight: '500' }}>Currency:</label>
+          <select
+            value={currency}
+            onChange={e => setCurrency(e.target.value)}
+            style={{ border: '1px solid #ccc', borderRadius: 4, padding: '4px 8px' }}
+          >
+            <option value="KES">KES</option>
+            <option value="USD">USD</option>
+          </select>
+        </div>
+      </div>
 
-      {cartItems.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500 text-lg">Your cart is empty</p>
-          <p className="text-gray-400">Add some items to get started</p>
+      {isLoading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '32px 0' }}>
+          <div style={{ width: 32, height: 32, border: '4px solid #ccc', borderTop: '4px solid #333', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: 8 }}></div>
+          <p>Loading...</p>
+        </div>
+      ) : error ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '32px 0' }}>
+          <span style={{ fontSize: 32, marginBottom: 8 }}>❌</span>
+          <p style={{ color: 'red' }}>{error}</p>
+        </div>
+      ) : cartItems.length === 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '32px 0' }}>
+          <span style={{ fontSize: 48, marginBottom: 8 }}>🛒</span>
+          <p>Your cart is empty.</p>
         </div>
       ) : (
         <>
-          <ul className="space-y-4 mb-6">
-            {cartItems.map(item => (
-              <li
-                key={item.id}
-                className="border p-4 rounded-lg flex flex-col sm:flex-row justify-between gap-4"
-              >
-                <div className="flex-1">
-                  <h4 className="font-semibold text-lg">{item.name}</h4>
-                  <p className="text-gray-600">
-                    KES {item.price.toFixed(2)} each
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <label htmlFor={`quantity-${item.id}`} className="sr-only">Quantity</label>
-                    <input
-                      id={`quantity-${item.id}`}
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={e =>
-                        handleQuantityChange(item.id, parseInt(e.target.value) || 1)
-                      }
-                      className="w-16 border rounded px-2 py-1 text-center"
-                    />
+          <ul style={{ listStyle: 'none', padding: 0, marginBottom: 24 }}>
+            {cartItems.map(item => {
+              const product = products.find(p => p.id === item.productId || p.id === item.id);
+              return (
+                <li key={item.id} style={{ border: '1px solid #ddd', padding: 16, borderRadius: 8, marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    {/* Product Image */}
+                    {item.image ? (
+                      <img src={item.image} alt={item.name || 'Product'} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, border: '1px solid #eee', marginRight: 12 }} />
+                    ) : (
+                      <div style={{ width: 60, height: 60, background: '#eee', borderRadius: 8, marginRight: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: 24 }}>
+                        ?
+                      </div>
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ fontWeight: '500', margin: 0 }}>{item.name || 'Unknown'}</h4>
+                      <p style={{ margin: '2px 0 0 0', fontSize: 13, color: '#555' }}>Category: {item.category || 'N/A'}</p>
+                      <p style={{ margin: 0 }}>{currencySymbol} {convert(item.price)} each</p>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <button
+                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                        style={{ width: 28, height: 28, fontSize: 18, border: '1px solid #ccc', borderRadius: 4, background: '#f3f3f3', cursor: 'pointer', marginRight: 4 }}
+                        disabled={item.quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={e => handleQuantityChange(item.id, e.target.value)}
+                        style={{ width: 48, border: '1px solid #ccc', padding: '4px', textAlign: 'center', marginRight: 4 }}
+                      />
+                      <button
+                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        style={{ width: 28, height: 28, fontSize: 18, border: '1px solid #ccc', borderRadius: 4, background: '#f3f3f3', cursor: 'pointer', marginRight: 8 }}
+                      >
+                        +
+                      </button>
+                      <p style={{ margin: 0 }}>{currencySymbol} {convert(item.price * item.quantity)}</p>
+                      <button onClick={() => handleRemoveItem(item.id)} style={{ marginLeft: 8, background: 'none', border: 'none', fontSize: 18, cursor: 'pointer' }}>❌</button>
+                    </div>
                   </div>
-                  <div className="text-right min-w-[100px]">
-                    <p className="font-medium">
-                      KES {(item.quantity * item.price).toFixed(2)}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => handleRemoveItem(item.id)}
-                    className="text-red-500 hover:text-red-700 p-1"
-                    aria-label="Remove item"
-                  >
-                    ×
-                  </button>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
 
-          <div className="border-t pt-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Total</h3>
-              <p className="text-2xl font-bold">KES {cartTotal.toFixed(2)}</p>
-            </div>
-            <button
-              onClick={handleCheckout}
-              className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium"
-            >
-              Proceed to Checkout
-            </button>
+          <div style={{ borderTop: '1px solid #ddd', paddingTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: 0 }}>Total</h3>
+            <p style={{ fontSize: '1.2rem', fontWeight: 'bold', margin: 0 }}>{currencySymbol} {convert(cartTotal)}</p>
           </div>
+
+          <button
+            onClick={handleCheckout}
+            style={{ width: '100%', marginTop: 16, background: '#16a34a', color: 'white', padding: '12px 0', border: 'none', borderRadius: 6, fontWeight: 'bold', fontSize: 16, cursor: 'pointer' }}
+          >
+            Proceed to Checkout
+          </button>
         </>
       )}
 
-      <hr className="my-8 border-gray-200" />
-      
-      <section>
-        <h3 className="text-xl font-bold mb-4">Your Order History</h3>
-        {sales.length === 0 ? (
-          <p className="text-gray-500 py-4">No past purchases yet.</p>
-        ) : (
-          <ul className="space-y-4">
-            {sales.map((sale, index) => (
-              <li key={index} className="border p-4 rounded-lg hover:bg-gray-50">
-                <div className="flex flex-col sm:flex-row justify-between gap-4">
-                  <div>
-                    <p className="text-sm text-gray-600">
-                      {new Date(sale.date).toLocaleString()}
-                    </p>
-                    <p className="font-medium">
-                      {sale.items.reduce((sum, item) => sum + item.quantity, 0)} items
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <p className="text-lg font-bold">KES {sale.total.toFixed(2)}</p>
-                    <button
-                      onClick={() => handleReorder(sale.items)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                    >
-                      Reorder
-                    </button>
-                  </div>
+      <hr style={{ margin: '32px 0' }} />
+
+      <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: 8 }}>Order History</h3>
+      {sales.length === 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '32px 0' }}>
+          <span style={{ fontSize: 32, marginBottom: 8 }}>📦</span>
+          <p>No sales yet</p>
+        </div>
+      ) : (
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {sales.map((sale, i) => (
+            <li key={i} style={{ border: '1px solid #ddd', padding: 16, borderRadius: 8, marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <div>
+                  <p style={{ fontSize: 13, color: '#666', margin: 0 }}>{new Date(sale.date).toLocaleString()}</p>
+                  <p style={{ fontSize: 13, margin: 0 }}>{sale.items.reduce((sum, i) => sum + i.quantity, 0)} items</p>
                 </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontWeight: 'bold', margin: 0 }}>{currencySymbol} {convert(sale.total)}</p>
+                  <button
+                    onClick={() => handleReorder(sale.items)}
+                    style={{ marginTop: 4, background: '#2563eb', color: 'white', padding: '4px 12px', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 14 }}
+                  >
+                    Reorder
+                  </button>
+                </div>
+              </div>
+              <ul style={{ fontSize: 13, color: '#444', marginLeft: 12, paddingLeft: 0 }}>
+                {sale.items.map((item, idx) => {
+                  const product = products.find(p => p.id === item.productId || p.id === item.id) || {};
+                  return (
+                    <li key={idx} style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {product.image ? (
+                        <img src={product.image} alt={item.name || 'Product'} style={{ width: 32, height: 32, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee', marginRight: 8 }} />
+                      ) : (
+                        <div style={{ width: 32, height: 32, background: '#eee', borderRadius: 4, marginRight: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: 16 }}>?</div>
+                      )}
+                      <span style={{ fontWeight: 500 }}>{item.name || 'Unknown'}</span>
+                      <span style={{ color: '#888', fontSize: 12 }}>({product.category || item.category || 'N/A'})</span>
+                      <span style={{ marginLeft: 'auto' }}>{currencySymbol} {convert(item.price * item.quantity)}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      )}
+      {toast && (
+        <div style={{ position: 'fixed', top: 24, right: 24, background: '#333', color: 'white', padding: '12px 24px', borderRadius: 8, zIndex: 1000, fontSize: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+          {toast}
+        </div>
+      )}
+      <style>{`
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 }

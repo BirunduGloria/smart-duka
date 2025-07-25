@@ -1,27 +1,19 @@
 {
   "cart": [
     {
-      "id": 1,
-      "name": "Fresh Milk",
-      "price": 100,
+      "id": "f965",
+      "quantity": 4
+    },
+    {
+      "id": "15f0",
       "quantity": 2
     },
     {
-      "id": 2,
-      "name": "Bread",
-      "price": 80,
-      "quantity": 1
-    },
-    {
-      "id": "bea0",
-      "name": "Fresh Milk",
-      "price": 100,
+      "id": "2d39",
       "quantity": 2
     },
     {
-      "id": "585f",
-      "name": "Bread",
-      "price": 80,
+      "id": "3c9b",
       "quantity": 1
     }
   ],
@@ -113,6 +105,98 @@
       ],
       "date": "2025-07-24T19:00:13.451Z",
       "total": 560
+    },
+    {
+      "id": "1844",
+      "items": [
+        {
+          "id": 1,
+          "name": "Fresh Milk",
+          "price": 100,
+          "quantity": 2
+        },
+        {
+          "id": 2,
+          "name": "Bread",
+          "price": 80,
+          "quantity": 1
+        },
+        {
+          "id": "bea0",
+          "name": "Fresh Milk",
+          "price": 100,
+          "quantity": 2
+        },
+        {
+          "id": "585f",
+          "name": "Bread",
+          "price": 80,
+          "quantity": 1
+        }
+      ],
+      "date": "2025-07-24T22:38:04.606Z",
+      "total": 560
+    },
+    {
+      "id": "dc22",
+      "items": [
+        {
+          "id": "2",
+          "name": "Bread",
+          "price": 80,
+          "quantity": 1
+        },
+        {
+          "id": "56c4",
+          "name": "Fresh Milk",
+          "price": 100,
+          "quantity": 12
+        },
+        {
+          "id": "ba36",
+          "name": "Bread",
+          "price": 80,
+          "quantity": 1
+        }
+      ],
+      "date": "2025-07-25T00:25:08.076Z",
+      "total": 1360
+    },
+    {
+      "id": "dca9",
+      "items": [
+        {
+          "id": "f5c8",
+          "quantity": 2,
+          "name": "Unknown",
+          "price": 0
+        },
+        {
+          "id": "3957",
+          "quantity": 1,
+          "name": "Unknown",
+          "price": 0
+        }
+      ],
+      "date": "2025-07-25T00:33:58.731Z",
+      "total": 0
+    },
+    {
+      "id": "3daf",
+      "items": [
+        {
+          "id": "9ae6",
+          "quantity": 3,
+          "name": "Unknown",
+          "price": 0
+        },
+        {
+          "id": "65fc",
+          "quantity": 2
+        }
+      ],
+      "date": "2025-07-25T00:40:36.009Z",
+      "total": null
     }
   ]
 }

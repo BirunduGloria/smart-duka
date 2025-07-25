@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from "react";
 import NavBar from "../components/NavBar";
 
-const API = "http://localhost:3003";
+const API = "";
 const CONVERSION_RATE = 160; // 1 USD = 160 KES
 
 function Cart() {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('cart');
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
+  });
   const [products, setProducts] = useState([]);
-  const [sales, setSales] = useState([]);
+  const [sales, setSales] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('sales');
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currency, setCurrency] = useState("KES");
@@ -33,28 +45,6 @@ function Cart() {
         const productsData = await productsRes.json();
         const products = Array.isArray(productsData[0]) ? productsData[0] : productsData;
         setProducts(products);
-        // Fetch cart and sales from backend
-        const [cartRes, salesRes] = await Promise.all([
-          fetch(`${API}/cart`),
-          fetch(`${API}/sales`)
-        ]);
-        if (!cartRes.ok || !salesRes.ok) throw new Error("Failed to fetch cart/sales");
-        const cartData = await cartRes.json();
-        const salesData = await salesRes.json();
-        // Merge cart items with product details from products.json
-        const mergedCart = cartData.map(cartItem => {
-          const product = products.find(p => p.id === cartItem.productId || p.id === cartItem.id) || {};
-          const price = product.pricing?.price ?? product.price ?? cartItem.price ?? 0;
-          return {
-            ...cartItem,
-            name: product.name || cartItem.name || "Unknown",
-            price: Number(price),
-            category: product.category || "N/A",
-            image: product.image || ""
-          };
-        });
-        setCartItems(mergedCart);
-        setSales(salesData);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -64,50 +54,39 @@ function Cart() {
     loadData();
   }, []);
 
-  // Update quantity of an item in cart
-  const handleQuantityChange = async (id, newQuantity) => {
-    if (newQuantity < 1) return;
-    try {
-      const res = await fetch(`${API}/cart/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quantity: newQuantity })
-      });
-      if (!res.ok) throw new Error('Failed to update quantity');
-      setCartItems(prev => prev.map(item => item.id === id ? { ...item, quantity: newQuantity } : item));
-    } catch (err) {
-      setError(err.message);
+  // Persist cart and sales to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cart', JSON.stringify(cartItems));
     }
+  }, [cartItems]);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sales', JSON.stringify(sales));
+    }
+  }, [sales]);
+
+  // Update quantity of an item in cart
+  const handleQuantityChange = (id, newQuantity) => {
+    if (newQuantity < 1) return;
+    setCartItems(prev => prev.map(item => item.id === id ? { ...item, quantity: newQuantity } : item));
   };
 
-  const handleRemoveItem = async (id) => {
+  const handleRemoveItem = (id) => {
     const itemToRemove = cartItems.find(item => item.id === id);
     if (!window.confirm("Are you sure you want to remove this item from the cart?")) return;
-    try {
-      const response = await fetch(`${API}/cart/${id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error('Failed to remove item');
-      setCartItems(prev => prev.filter(item => item.id !== id));
-      setLastRemoved(itemToRemove);
-      setToast('Item removed.');
-      setTimeout(() => {
-        setToast("");
-        setLastRemoved(null);
-      }, 4000);
-    } catch (err) {
-      setError(err.message);
-    }
+    setCartItems(prev => prev.filter(item => item.id !== id));
+    setLastRemoved(itemToRemove);
+    setToast('Item removed.');
+    setTimeout(() => {
+      setToast("");
+      setLastRemoved(null);
+    }, 4000);
   };
 
   // Undo remove
-  const handleUndoRemove = async () => {
+  const handleUndoRemove = () => {
     if (!lastRemoved) return;
-    // Re-add to backend
-    const { id, ...itemData } = lastRemoved;
-    await fetch(`${API}/cart`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(itemData)
-    });
     setCartItems(prev => [...prev, lastRemoved]);
     setToast('Item restored!');
     setTimeout(() => setToast(""), 2000);
@@ -115,68 +94,35 @@ function Cart() {
   };
 
   // Checkout: Save to /sales and clear cart
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (cartItems.length === 0) {
       setToast("Your cart is empty. Add some items before checkout.");
       setTimeout(() => setToast(""), 3000);
       return;
     }
-    try {
-      const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      const newSale = {
-        items: cartItems,
-        date: new Date().toISOString(),
-        total
-      };
-      const response = await fetch(`${API}/sales`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newSale)
-      });
-      if (!response.ok) throw new Error('Checkout failed');
-      const savedSale = await response.json();
-      await Promise.all(
-        cartItems.map(item => fetch(`${API}/cart/${item.id}`, { method: "DELETE" }))
-      );
-      setToast("Checkout successful! Thank you for your purchase.");
-      setTimeout(() => setToast(""), 3000);
-      setSales(prev => [...prev, savedSale]);
-      setCartItems([]);
-    } catch (err) {
-      setError(err.message);
-      setToast("Checkout failed. Please try again.");
-      setTimeout(() => setToast(""), 3000);
-    }
+    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const newSale = {
+      items: cartItems,
+      date: new Date().toISOString(),
+      total
+    };
+    setSales(prev => [...prev, newSale]);
+    setCartItems([]);
+    setToast("Checkout successful! Thank you for your purchase.");
+    setTimeout(() => setToast(""), 3000);
   };
 
-  const handleReorder = async (items) => {
-    try {
-      await Promise.all(
-        items.map(async item => {
-          const existing = cartItems.find(i => i.id === item.id || i.productId === item.productId);
-          if (existing) {
-            await fetch(`${API}/cart/${existing.id}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ quantity: existing.quantity + item.quantity })
-            });
-          } else {
-            const { id, ...newItem } = item;
-            await fetch(`${API}/cart`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(newItem)
-            });
-          }
-        })
-      );
-      setToast("Items have been added to your cart!");
-      setTimeout(() => setToast(""), 3000);
-    } catch (err) {
-      setError(err.message);
-      setToast("Failed to reorder items. Please try again.");
-      setTimeout(() => setToast(""), 3000);
-    }
+  const handleReorder = (items) => {
+    items.forEach(item => {
+      const existing = cartItems.find(i => i.id === item.id);
+      if (existing) {
+        setCartItems(prev => prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i));
+      } else {
+        setCartItems(prev => [...prev, { ...item }]);
+      }
+    });
+    setToast("Items have been added to your cart!");
+    setTimeout(() => setToast(""), 3000);
   };
 
   const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);

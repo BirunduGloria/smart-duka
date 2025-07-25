@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "backend": "npx json-server --watch db.json --port 3003"
   },
   "dependencies": {
     "react": "19.1.0",

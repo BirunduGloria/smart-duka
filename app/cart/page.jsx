@@ -1,4 +1,4 @@
-'use client'; // Needed if Cart uses useState/useEffect or browser-only logic
+'use client';
 
 import Cart from '../components/Cart';
 

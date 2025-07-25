@@ -1,10 +1,9 @@
-
-  [
+[
   {
     "id": 1,
     "name": "Milk",
     "category": "Food",
-    "image": "ttps://i.pinimg.com/736x/79/81/eb/7981ebddff2991fd734b6390a58daeb1.jpg",
+    "image": "https://i.pinimg.com/736x/79/81/eb/7981ebddff2991fd734b6390a58daeb1.jpg",
     "pricing": { "price": 2.5, "discount": 0.2 },
     "inventory": { "unitsInStock": 2, "unitsSold": 60 },
     "expiryDate": "2025-08-01"
@@ -136,4 +135,3 @@
     "expiryDate": "2046-03-30"
   }
 ]
-

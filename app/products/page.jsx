@@ -1,58 +1,28 @@
- 'use client';
-import React, { useEffect, useState } from 'react';
-import ProductCard from '../components/ProductCard';
-import ProductForm from '../components/ProductForm';
-import NavBar from '../components/NavBar';  
-// Dummy product data
-const dummyProducts = [
-  {
-    id: 1,
-    name: 'Milk',
-    category: 'Dairy',
-    price: 2.5,
-    discount: 0.2,
-    unitsSold: 60,
-    stock: 2,
-    expiry: '2025-08-01',
-  },
-  {
-    id: 2,
-    name: 'Bread',
-    category: 'Bakery',
-    price: 1.2,
-    discount: 0,
-    unitsSold: 20,
-    stock: 10,
-    expiry: '2024-07-25',
-  },
-  {
-    id: 3,
-    name: 'Eggs',
-    category: 'Dairy',
-    price: 3.5,
-    discount: 0.1,
-    unitsSold: 100,
-    stock: 1,
-    expiry: '2024-07-28',
-  },
-];
+'use client';
+import React, { useState, useEffect } from 'react';
 
-export default function ProductsPage() {
-  const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [message, setMessage] = useState('');
-  const isAdmin = true;
+export default function ProductForm({ product, onSave, onCancel }) {
+  const [formData, setFormData] = useState({
+    id: null,
+    name: '',
+    category: '',
+    image: '',
+    pricing: {
+      price: 0,
+      discount: 0,
+    },
+    inventory: {
+      unitsInStock: 0,
+      unitsSold: 0,
+    },
+    expiryDate: '',
+  });
 
   useEffect(() => {
-    setProducts(dummyProducts);
-    const storedCart = localStorage.getItem('cart');
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
+    if (product) {
+      setFormData(product);
     }
-  }, []);
+  }, [product]);
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -68,41 +38,65 @@ export default function ProductsPage() {
     localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
-  const handleEdit = (product) => {
-    setEditingProduct(product);
+
+    if (name === 'price' || name === 'discount') {
+      setFormData((prev) => ({
+        ...prev,
+        pricing: {
+          ...prev.pricing,
+          [name]: Number(value),
+        },
+      }));
+    } else if (name === 'unitsInStock' || name === 'unitsSold') {
+      setFormData((prev) => ({
+        ...prev,
+        inventory: {
+          ...prev.inventory,
+          [name]: Number(value),
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
-  const handleDelete = (id) => {
-    setProducts(products.filter((p) => p.id !== id));
-  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  const handleSave = (updatedProduct) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-    );
-    setEditingProduct(null);
-  };
+    if (!formData.name.trim() || !formData.category.trim()) {
+      alert('Name and Category are required');
+      return;
+    }
 
-  const filteredProducts = products.filter((p) => {
-    const nameMatch = p.name.toLowerCase().includes(search.toLowerCase());
-    const categoryMatch = selectedCategory
-      ? p.category.toLowerCase().includes(selectedCategory.toLowerCase())
-      : true;
-    return nameMatch && categoryMatch;
-  });
+    onSave(formData);
+  };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Product Catalog</h1>
+    <div className="modal-backdrop">
+      <form onSubmit={handleSubmit} className="product-form">
+        <h2>{product ? 'Edit' : 'Add'} Product</h2>
 
-      <div className="flex gap-4 mb-4">
         <input
-          type="text"
-          placeholder="Search by name"
-          className="border p-2 w-1/3"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="Product Name"
+          required
+          className="form-input"
         />
+
+        <input
+          name="category"
+          value={formData.category}
+          onChange={handleChange}
+          placeholder="Category"
+          required
+          className="form-input"
+        />
+
         <div className="w-1/3">
  
           <label htmlFor="categoryFilter" className="block font-medium mb-1">
@@ -125,18 +119,66 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {editingProduct && (
-        <ProductForm
-          product={editingProduct}
-          onSave={handleSave}
-          onCancel={() => setEditingProduct(null)}
-        />
-      )}
 
-      {message && (
-        <div className="bg-green-100 text-green-800 p-2 rounded mb-4 shadow">
-          {message}
+        <input
+          type="number"
+          name="price"
+          value={formData.pricing.price}
+          onChange={handleChange}
+          placeholder="Price"
+          min="0"
+          step="0.01"
+          className="form-input"
+        />
+
+        <input
+          type="number"
+          name="unitsInStock"
+          value={formData.inventory.unitsInStock}
+          onChange={handleChange}
+          placeholder="Units in Stock"
+          min="0"
+          className="form-input"
+        />
+
+        <input
+          type="number"
+          name="discount"
+          value={formData.pricing.discount}
+          onChange={handleChange}
+          placeholder="Discount (%)"
+          min="0"
+          max="100"
+          className="form-input"
+        />
+
+        <input
+          type="number"
+          name="unitsSold"
+          value={formData.inventory.unitsSold}
+          onChange={handleChange}
+          placeholder="Units Sold"
+          min="0"
+          className="form-input"
+        />
+
+        <input
+          type="date"
+          name="expiryDate"
+          value={formData.expiryDate}
+          onChange={handleChange}
+          className="form-input"
+        />
+
+        <div className="button-group">
+          <button type="button" onClick={onCancel} className="cancel-button">
+            Cancel
+          </button>
+          <button type="submit" className="submit-button">
+            {product ? 'Update' : 'Add'}
+          </button>
         </div>
+
       )}
 
 
@@ -166,6 +208,7 @@ export default function ProductsPage() {
           ))}
         </ul>
       </div>
+
     </div>
   );
 }

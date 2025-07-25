@@ -16,7 +16,7 @@ Designed for small retail setups and duka owners, it supports inventory tracking
 
 ### Prerequisites
 - Node.js (v16 or later recommended)
-- npm or yarn
+- npm 
 - Git
 
 ### Installation
@@ -28,15 +28,13 @@ Designed for small retail setups and duka owners, it supports inventory tracking
 2. **Install dependencies:**
    ```bash
    npm install
-   # or
-   yarn install
+
    ```
 
 ### Running the App
 ```bash
 npm run dev
-# or
-yarn dev
+
 ```
 View app on vercel
 

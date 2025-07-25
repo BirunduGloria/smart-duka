@@ -1,19 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
-import inventoryDataRaw from '../data/products.json';
+import React, { useState, useEffect } from 'react';
 import { useUserContext } from '../context/UserContext';
 import ProductForm from './ProductForm';
 
 export default function InventoryList() {
   const { user } = useUserContext();
-  const [products, setProducts] = useState(inventoryDataRaw[0]);
+  const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [editPriceId, setEditPriceId] = useState(null);
   const [newPrice, setNewPrice] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editFields, setEditFields] = useState({});
+
+  useEffect(() => {
+    fetch('/data/products.json')
+      .then(res => res.json())
+      .then(data => setProducts(data));
+  }, []);
 
   if (!user || user.role !== 'admin') {
     return null;

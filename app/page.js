@@ -4,9 +4,12 @@ import NavBar from '../app/components/NavBar';
 import SearchBar from '../app/components/SearchBar';
 import './globals.css';
 import LayoutWrapper from './LayoutWrapper';
+import Footer from './components/Footer';
+import { useUserContext } from './context/UserContext';
 
 function Home() {
-  const isAdmin = true;
+  const { user } = useUserContext();
+  const isAdmin = user?.role === 'admin';
   const [currency, setCurrency] = useState('KES');
   const [query, setQuery] = useState('');
   const [cartCount, setCartCount] = useState(0);
@@ -81,7 +84,6 @@ function Home() {
   return (
     <>
       <NavBar onSearch={handleSearch} cartCount={cartCount} />
-
       <main className="main-container">
         <div className="header-section standout-header">
           <h1>Welcome to Smart-Duka</h1>
@@ -93,7 +95,6 @@ function Home() {
             </select>
           </div>
         </div>
-
         <section className="section standout-section">
           <h2>Featured Products</h2>
           <ul className="product-grid standout-grid">
@@ -114,7 +115,6 @@ function Home() {
               ))}
           </ul>
         </section>
-
         <section className="section standout-section">
           <h2>Fast Selling Products</h2>
           <ul className="product-grid standout-grid">
@@ -131,36 +131,40 @@ function Home() {
               ))}
           </ul>
         </section>
-
-        <section className="section standout-section">
-          <h2>Smart Stock Alerts</h2>
-          <ul className="alert-list standout-alert">
-            {filteredProducts
-              .filter((p) => p.inventory.unitsInStock < 5)
-              .map((product) => (
-                <li key={product.id}>
-                  <span className="product-name">{product.name}</span> – only {product.inventory.unitsInStock} left
-                  <button className="add-btn" onClick={() => addToCart(product)}>Add to Cart</button>
-                </li>
-              ))}
-          </ul>
-        </section>
-
-        {isAdmin && today && (
-          <section className="section standout-section">
-            <h2>Expiring Soon</h2>
-            <ul className="alert-list standout-alert expiring">
-              {filteredProducts
-                .filter((p) => daysFromToday(p.expiryDate) <= 7)
-                .map((product) => (
-                  <li key={product.id}>
-                    <span className="product-name">{product.name}</span> – expiring soon ({product.expiryDate})
-                  </li>
-                ))}
-            </ul>
-          </section>
+        {/* Admin-only sections below */}
+        {isAdmin && (
+          <>
+            <section className="section standout-section">
+              <h2>Smart Stock Alerts</h2>
+              <ul className="alert-list standout-alert">
+                {filteredProducts
+                  .filter((p) => p.inventory.unitsInStock < 5)
+                  .map((product) => (
+                    <li key={product.id}>
+                      <span className="product-name">{product.name}</span> – only {product.inventory.unitsInStock} left
+                      <button className="add-btn" onClick={() => addToCart(product)}>Add to Cart</button>
+                    </li>
+                  ))}
+              </ul>
+            </section>
+            {today && (
+              <section className="section standout-section">
+                <h2>Expiring Soon</h2>
+                <ul className="alert-list standout-alert expiring">
+                  {filteredProducts
+                    .filter((p) => daysFromToday(p.expiryDate) <= 7)
+                    .map((product) => (
+                      <li key={product.id}>
+                        <span className="product-name">{product.name}</span> – expiring soon ({product.expiryDate})
+                      </li>
+                    ))}
+                </ul>
+              </section>
+            )}
+          </>
         )}
       </main>
+      <Footer />
     </>
   );
 }

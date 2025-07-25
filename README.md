@@ -37,6 +37,7 @@ npm run dev
 
 ```
 View app on vercel
+Through; https://smart-duka-59kqg7qxt-gloria-birundus-projects.vercel.app/
 
 ### Project Structure
 📦app/

@@ -125,7 +125,11 @@ function Cart() {
     setTimeout(() => setToast(""), 3000);
   };
 
-  const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const cartTotal = cartItems.reduce((sum, item) => {
+    const product = products.find(p => p.id === item.id);
+    const price = product ? (product.pricing?.price ?? product.price ?? 0) : 0;
+    return sum + price * (item.quantity || 1);
+  }, 0);
   const PLACEHOLDER_IMG = 'https://via.placeholder.com/120x120?text=No+Image';
 
   if (isLoading) {
@@ -184,83 +188,88 @@ function Cart() {
             background: 'transparent',
             listStyle: 'none',
           }}>
-            {cartItems.map(item => (
-              <li key={item.id} style={{
-                background: '#fff',
-                borderRadius: 12,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                padding: 24,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                minWidth: 0,
-                maxWidth: 340,
-                margin: '0 auto',
-                position: 'relative',
-              }}>
-                <img
-                  src={item.image || PLACEHOLDER_IMG}
-                  alt={item.name}
-                  style={{
-                    width: 120,
-                    height: 120,
-                    objectFit: 'cover',
-                    borderRadius: 8,
-                    marginBottom: 16,
-                    background: '#f5f5f5',
-                    border: '1px solid #eee',
-                  }}
-                />
-                <h4 style={{ fontWeight: 700, fontSize: 20, margin: '0 0 8px 0', textAlign: 'center' }}>{item.name}</h4>
-                <p style={{ margin: '6px 0 0 0', fontSize: 14, color: '#666' }}>Category: <span style={{ color: '#444' }}>{item.category}</span></p>
-                <p style={{ margin: 0, color: '#6b7280', fontSize: 14 }}>{formatPrice(item.price)} each</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <button
-                    onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                    style={{ width: 32, height: 32, fontSize: 20, border: '1px solid #ccc', borderRadius: 6, backgroundColor: '#f3f3f3', cursor: 'pointer', color: '#333' }}
-                    disabled={item.quantity <= 1}
-                  >
-                    -
-                  </button>
-                  <input
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={e => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
-                    style={{ width: 54, border: '1px solid #ccc', padding: '6px', textAlign: 'center', borderRadius: 6, fontSize: 16 }}
+            {cartItems.map(item => {
+              const product = products.find(p => p.id === item.id);
+              if (!product) return null;
+              const price = product.pricing?.price ?? product.price ?? 0;
+              return (
+                <li key={item.id} style={{
+                  background: '#fff',
+                  borderRadius: 12,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  padding: 24,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  minWidth: 0,
+                  maxWidth: 340,
+                  margin: '0 auto',
+                  position: 'relative',
+                }}>
+                  <img
+                    src={product.image || PLACEHOLDER_IMG}
+                    alt={product.name}
+                    style={{
+                      width: 120,
+                      height: 120,
+                      objectFit: 'cover',
+                      borderRadius: 8,
+                      marginBottom: 16,
+                      background: '#f5f5f5',
+                      border: '1px solid #eee',
+                    }}
                   />
+                  <h4 style={{ fontWeight: 700, fontSize: 20, margin: '0 0 8px 0', textAlign: 'center' }}>{product.name}</h4>
+                  <p style={{ margin: '6px 0 0 0', fontSize: 14, color: '#666' }}>Category: <span style={{ color: '#444' }}>{product.category}</span></p>
+                  <p style={{ margin: 0, color: '#6b7280', fontSize: 14 }}>{formatPrice(price)} each</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <button
+                      onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                      style={{ width: 32, height: 32, fontSize: 20, border: '1px solid #ccc', borderRadius: 6, backgroundColor: '#f3f3f3', cursor: 'pointer', color: '#333' }}
+                      disabled={item.quantity <= 1}
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={e => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
+                      style={{ width: 54, border: '1px solid #ccc', padding: '6px', textAlign: 'center', borderRadius: 6, fontSize: 16 }}
+                    />
+                    <button
+                      onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                      style={{ width: 32, height: 32, fontSize: 20, border: '1px solid #ccc', borderRadius: 6, backgroundColor: '#f3f3f3', cursor: 'pointer', color: '#333' }}
+                    >
+                      +
+                    </button>
+                  </div>
+                  <div style={{ textAlign: 'right', minWidth: '110px' }}>
+                    <p style={{ fontWeight: 600, margin: 0, fontSize: 16, color: '#222' }}>
+                      {formatPrice(price * (item.quantity || 1))}
+                    </p>
+                  </div>
                   <button
-                    onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                    style={{ width: 32, height: 32, fontSize: 20, border: '1px solid #ccc', borderRadius: 6, backgroundColor: '#f3f3f3', cursor: 'pointer', color: '#333' }}
+                    onClick={() => handleRemoveItem(item.id)}
+                    style={{ color: '#ef4444', cursor: 'pointer', fontSize: 22, background: 'none', border: 'none', padding: '4px', marginLeft: 8 }}
+                    title="Remove item"
                   >
-                    +
+                    ×
                   </button>
-                </div>
-                <div style={{ textAlign: 'right', minWidth: '110px' }}>
-                  <p style={{ fontWeight: 600, margin: 0, fontSize: 16, color: '#222' }}>
-                    {formatPrice(item.quantity * item.price)}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleRemoveItem(item.id)}
-                  style={{ color: '#ef4444', cursor: 'pointer', fontSize: 22, background: 'none', border: 'none', padding: '4px', marginLeft: 8 }}
-                  title="Remove item"
-                >
-                  ×
-                </button>
-                <div style={{ flexBasis: '100%', marginTop: 10 }}>
-                  <label htmlFor={`note-${item.id}`} style={{ fontSize: 13, color: '#555', fontWeight: 500, display: 'block', marginBottom: 2 }}>Note for this item:</label>
-                  <input
-                    id={`note-${item.id}`}
-                    type="text"
-                    value={itemNotes[item.id] || ''}
-                    onChange={e => setItemNotes(notes => ({ ...notes, [item.id]: e.target.value }))}
-                    placeholder="Add a note or special instruction..."
-                    style={{ width: '100%', border: '1px solid #e5e7eb', borderRadius: 6, padding: '7px 10px', fontSize: 14, color: '#333', background: '#f9fafb', marginBottom: 0 }}
-                  />
-                </div>
-              </li>
-            ))}
+                  <div style={{ flexBasis: '100%', marginTop: 10 }}>
+                    <label htmlFor={`note-${item.id}`} style={{ fontSize: 13, color: '#555', fontWeight: 500, display: 'block', marginBottom: 2 }}>Note for this item:</label>
+                    <input
+                      id={`note-${item.id}`}
+                      type="text"
+                      value={itemNotes[item.id] || ''}
+                      onChange={e => setItemNotes(notes => ({ ...notes, [item.id]: e.target.value }))}
+                      placeholder="Add a note or special instruction..."
+                      style={{ width: '100%', border: '1px solid #e5e7eb', borderRadius: 6, padding: '7px 10px', fontSize: 14, color: '#333', background: '#f9fafb', marginBottom: 0 }}
+                    />
+                  </div>
+                </li>
+              );
+            })}
           </ul>
           <div style={{ borderTop: '2px solid #e5e7eb', paddingTop: '24px', marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ fontSize: '1.3rem', fontWeight: 700, margin: 0, color: '#222' }}>Total</h3>

@@ -1,127 +1,154 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import NavBar from '../components/NavBar';
+
+const API = "http://localhost:3003";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [sales, setSales] = useState([]);
+  const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API = "http://localhost:3003";
-
-  // Fetch data with error handling
-  const fetchData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const [cartResponse, salesResponse] = await Promise.all([
-        fetch(`${API}/cart`),
-        fetch(`${API}/sales`)
-      ]);
-      
-      if (!cartResponse.ok || !salesResponse.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      
-      const [cartData, salesData] = await Promise.all([
-        cartResponse.json(),
-        salesResponse.json()
-      ]);
-      
-      setCartItems(cartData);
-      setSales(salesData);
-    } catch (err) {
-      setError(err.message);
-      console.error("Fetch error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const [toast, setToast] = useState("");
+  const [itemNotes, setItemNotes] = useState({});
+  const [lastRemoved, setLastRemoved] = useState(null);
+  const [currency, setCurrency] = useState('KES');
+  const conversionRate = 150;
+  const formatPrice = (price) => {
+    const converted = currency === 'USD' ? (price / conversionRate).toFixed(2) : Number(price).toFixed(2);
+    return currency === 'USD' ? `$ ${converted}` : `KES ${converted}`;
+  };
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    async function loadData() {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Fetch products from public/products.json
+        const productsRes = await fetch('/products.json');
+        if (!productsRes.ok) throw new Error("Failed to fetch products");
+        const productsData = await productsRes.json();
+        const products = Array.isArray(productsData[0]) ? productsData[0] : productsData;
+        setProducts(products);
+
+        // Fetch cart and sales from backend
+        const [cartRes, salesRes] = await Promise.all([
+          fetch(`${API}/cart`),
+          fetch(`${API}/sales`)
+        ]);
+        if (!cartRes.ok || !salesRes.ok) throw new Error("Failed to fetch cart/sales");
+
+        const cartData = await cartRes.json();
+        const salesData = await salesRes.json();
+
+        // Merge cart items with product details from products.json
+        const mergedCart = cartData.map(cartItem => {
+          const product = products.find(p => p.id === cartItem.productId || p.id === cartItem.id) || {};
+          const price = product.pricing?.price ?? product.price ?? cartItem.price ?? 0;
+          return {
+            ...cartItem,
+            name: product.name || cartItem.name || "Unknown",
+            price: Number(price),
+            category: product.category || "N/A",
+            image: product.image || ""
+          };
+        });
+
+        setCartItems(mergedCart);
+        setSales(salesData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   // Update quantity of an item in cart
   const handleQuantityChange = async (id, newQuantity) => {
     if (newQuantity < 1) return;
-    
     try {
       const response = await fetch(`${API}/cart/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ quantity: newQuantity })
       });
-      
       if (!response.ok) throw new Error('Failed to update quantity');
-      
-      const updated = await response.json();
-      setCartItems(prev => prev.map(item => item.id === id ? updated : item));
+      setCartItems(prev => prev.map(item => item.id === id ? { ...item, quantity: newQuantity } : item));
     } catch (err) {
       setError(err.message);
-      console.error("Update error:", err);
     }
   };
 
   // Remove item from cart
   const handleRemoveItem = async (id) => {
+    const itemToRemove = cartItems.find(item => item.id === id);
+    if (!window.confirm("Are you sure you want to remove this item from the cart?")) return;
     try {
-      const response = await fetch(`${API}/cart/${id}`, { 
-        method: "DELETE" 
-      });
-      
+      const response = await fetch(`${API}/cart/${id}`, { method: "DELETE" });
       if (!response.ok) throw new Error('Failed to remove item');
-      
       setCartItems(prev => prev.filter(item => item.id !== id));
+      setLastRemoved(itemToRemove);
+      setToast('Item removed.');
+      setTimeout(() => {
+        setToast("");
+        setLastRemoved(null);
+      }, 4000);
     } catch (err) {
       setError(err.message);
-      console.error("Delete error:", err);
     }
+  };
+
+  // Undo remove
+  const handleUndoRemove = async () => {
+    if (!lastRemoved) return;
+    // Re-add to backend
+    const { id, ...itemData } = lastRemoved;
+    await fetch(`${API}/cart`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(itemData)
+    });
+    setCartItems(prev => [...prev, lastRemoved]);
+    setToast('Item restored!');
+    setTimeout(() => setToast(""), 2000);
+    setLastRemoved(null);
   };
 
   // Checkout: Save to /sales and clear cart
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
-      alert("Your cart is empty. Add some items before checkout.");
+      setToast("Your cart is empty. Add some items before checkout.");
+      setTimeout(() => setToast(""), 3000);
       return;
     }
-
     try {
-      const total = cartItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-      );
-
+      const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
       const newSale = {
         items: cartItems,
         date: new Date().toISOString(),
         total
       };
-
       const response = await fetch(`${API}/sales`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newSale)
       });
-      
       if (!response.ok) throw new Error('Checkout failed');
-      
       const savedSale = await response.json();
-      
-      // Clear cart on server in parallel
       await Promise.all(
-        cartItems.map(item => 
-          fetch(`${API}/cart/${item.id}`, { method: "DELETE" })
-        )
+        cartItems.map(item => fetch(`${API}/cart/${item.id}`, { method: "DELETE" }))
       );
-      
-      alert("Checkout successful! Thank you for your purchase.");
+      setToast("Checkout successful! Thank you for your purchase.");
+      setTimeout(() => setToast(""), 3000);
       setSales(prev => [...prev, savedSale]);
       setCartItems([]);
     } catch (err) {
       setError(err.message);
-      console.error("Checkout error:", err);
-      alert("Checkout failed. Please try again.");
+      setToast("Checkout failed. Please try again.");
+      setTimeout(() => setToast(""), 3000);
     }
   };
 
@@ -130,18 +157,16 @@ function Cart() {
     try {
       await Promise.all(
         items.map(async item => {
-          const existing = cartItems.find(i => i.id === item.id);
+          const existing = cartItems.find(i => i.id === item.id || i.productId === item.productId);
           if (existing) {
-            // Update quantity if already in cart
             const updatedQuantity = existing.quantity + item.quantity;
-            await fetch(`${API}/cart/${item.id}`, {
+            await fetch(`${API}/cart/${existing.id}`, {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ quantity: updatedQuantity })
             });
           } else {
-            // Add new item to cart
-            const { id, ...newItem } = item; // remove id to let server assign new one
+            const { id, ...newItem } = item;
             await fetch(`${API}/cart`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -150,43 +175,40 @@ function Cart() {
           }
         })
       );
-      
-      // Refresh cart
-      const response = await fetch(`${API}/cart`);
-      if (!response.ok) throw new Error('Failed to refresh cart');
-      setCartItems(await response.json());
-      
-      alert("Items have been added to your cart!");
+      await Promise.resolve();
+      setToast("Items have been added to your cart!");
+      setTimeout(() => setToast(""), 3000);
+      // Optionally reload cart data
     } catch (err) {
       setError(err.message);
-      console.error("Reorder error:", err);
-      alert("Failed to reorder items. Please try again.");
+      setToast("Failed to reorder items. Please try again.");
+      setTimeout(() => setToast(""), 3000);
     }
   };
 
-  const cartTotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   if (isLoading) {
     return (
-      <div className="p-4 max-w-3xl mx-auto">
+      <div style={{ padding: '16px', maxWidth: '800px', margin: '0 auto' }}>
         <NavBar />
-        <div className="text-center py-8">Loading your cart...</div>
+        <div style={{ textAlign: 'center', padding: '32px 0' }}>
+          <div style={{ width: 32, height: 32, border: '4px solid #ccc', borderTop: '4px solid #333', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }}></div>
+          <p>Loading your cart...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4 max-w-3xl mx-auto">
+      <div style={{ padding: '16px', maxWidth: '800px', margin: '0 auto' }}>
         <NavBar />
-        <div className="text-red-500 p-4 bg-red-50 rounded">
+        <div style={{ color: 'red', padding: '16px', backgroundColor: '#fef2f2', borderRadius: '8px', border: '1px solid #fecaca' }}>
           Error: {error}
           <button 
-            onClick={fetchData}
-            className="ml-4 bg-blue-500 text-white px-3 py-1 rounded"
+            onClick={() => window.location.reload()}
+            style={{ marginLeft: '16px', backgroundColor: '#3b82f6', color: 'white', padding: '8px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
           >
             Retry
           </button>
@@ -195,110 +217,256 @@ function Cart() {
     );
   }
 
+  // Helper for placeholder image
+  const PLACEHOLDER_IMG = 'https://via.placeholder.com/120x120?text=No+Image';
+
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <div style={{ padding: '32px', maxWidth: '900px', margin: '32px auto', background: '#fafbfc', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
       <NavBar />
-      <h2 className="text-2xl font-bold mb-4">🛒 Your Shopping Cart</h2>
+      <h2 style={{ fontSize: '2.2rem', fontWeight: 700, margin: '24px 0 32px 0', letterSpacing: '-1px', color: '#222' }}>🛒 Your Shopping Cart</h2>
+
+      {/* Add currency selector at the top of the cart */}
+      <div style={{ marginBottom: 24, textAlign: 'right' }}>
+        <label style={{ marginRight: 8 }}>Currency:</label>
+        <select value={currency} onChange={e => setCurrency(e.target.value)} style={{ padding: 4, borderRadius: 4 }}>
+          <option value="KES">KES</option>
+          <option value="USD">USD</option>
+        </select>
+      </div>
 
       {cartItems.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500 text-lg">Your cart is empty</p>
-          <p className="text-gray-400">Add some items to get started</p>
+        <div style={{ textAlign: 'center', padding: '48px 0', color: '#888' }}>
+          <p style={{ fontSize: '1.2rem', marginBottom: 8 }}>Your cart is empty</p>
+          <p style={{ color: '#b0b0b0' }}>Add some items to get started</p>
         </div>
       ) : (
         <>
-          <ul className="space-y-4 mb-6">
+          <ul style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '2rem',
+            padding: '2rem',
+            margin: 0,
+            background: 'transparent',
+            listStyle: 'none',
+          }}>
             {cartItems.map(item => (
-              <li
-                key={item.id}
-                className="border p-4 rounded-lg flex flex-col sm:flex-row justify-between gap-4"
-              >
-                <div className="flex-1">
-                  <h4 className="font-semibold text-lg">{item.name}</h4>
-                  <p className="text-gray-600">
-                    KES {item.price.toFixed(2)} each
+              <li key={item.id} style={{
+                background: '#fff',
+                borderRadius: 12,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                padding: 24,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                minWidth: 0,
+                maxWidth: 340,
+                margin: '0 auto',
+                position: 'relative',
+              }}>
+                <img
+                  src={item.image || PLACEHOLDER_IMG}
+                  alt={item.name}
+                  style={{
+                    width: 120,
+                    height: 120,
+                    objectFit: 'cover',
+                    borderRadius: 8,
+                    marginBottom: 16,
+                    background: '#f5f5f5',
+                    border: '1px solid #eee',
+                  }}
+                />
+                <h4 style={{ fontWeight: 700, fontSize: 20, margin: '0 0 8px 0', textAlign: 'center' }}>{item.name}</h4>
+                <p style={{ margin: '6px 0 0 0', fontSize: 14, color: '#666' }}>Category: <span style={{ color: '#444' }}>{item.category}</span></p>
+                {/* Discounted price display */}
+                {(() => {
+                  const product = products.find(p => p.id === item.productId || p.id === item.id);
+                  const hasDiscount = product?.pricing?.discount && product.pricing.discount > 0;
+                  if (hasDiscount) {
+                    const original = product.pricing.price;
+                    const discount = product.pricing.discount;
+                    const discounted = (original * (1 - discount)).toFixed(2);
+                    return (
+                      <div style={{ margin: '4px 0 0 0', fontSize: 14 }}>
+                        <span style={{ textDecoration: 'line-through', color: '#888', marginRight: 8 }}>{formatPrice(original)}</span>
+                        <span style={{ color: '#d97706', fontWeight: 700 }}>{formatPrice(discounted)}</span>
+                        <span style={{ color: '#16a34a', fontWeight: 600, marginLeft: 8 }}>-{Math.round(discount * 100)}%</span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                <p style={{ margin: 0, color: '#6b7280', fontSize: 14 }}>{formatPrice(item.price)} each</p>
+                {/* Stock/availability */}
+                {(() => {
+                  const product = products.find(p => p.id === item.productId || p.id === item.id);
+                  const stock = product?.inventory?.unitsInStock;
+                  return (
+                    <span style={{ fontSize: 13, color: stock > 0 ? '#16a34a' : '#ef4444', fontWeight: 500, marginTop: 2, display: 'inline-block' }}>
+                      {typeof stock === 'number' ? (stock > 0 ? `In stock: ${stock}` : 'Out of stock') : 'Stock unknown'}
+                    </span>
+                  );
+                })()}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <button
+                    onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                    style={{ width: 32, height: 32, fontSize: 20, border: '1px solid #ccc', borderRadius: 6, backgroundColor: '#f3f3f3', cursor: 'pointer', color: '#333' }}
+                    disabled={item.quantity <= 1}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    value={item.quantity}
+                    onChange={e => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
+                    style={{ width: 54, border: '1px solid #ccc', padding: '6px', textAlign: 'center', borderRadius: 6, fontSize: 16 }}
+                  />
+                  <button
+                    onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                    style={{ width: 32, height: 32, fontSize: 20, border: '1px solid #ccc', borderRadius: 6, backgroundColor: '#f3f3f3', cursor: 'pointer', color: '#333' }}
+                  >
+                    +
+                  </button>
+                </div>
+                <div style={{ textAlign: 'right', minWidth: '110px' }}>
+                  <p style={{ fontWeight: 600, margin: 0, fontSize: 16, color: '#222' }}>
+                    {formatPrice(item.quantity * item.price)}
                   </p>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <label htmlFor={`quantity-${item.id}`} className="sr-only">Quantity</label>
-                    <input
-                      id={`quantity-${item.id}`}
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={e =>
-                        handleQuantityChange(item.id, parseInt(e.target.value) || 1)
-                      }
-                      className="w-16 border rounded px-2 py-1 text-center"
-                    />
-                  </div>
-                  <div className="text-right min-w-[100px]">
-                    <p className="font-medium">
-                      KES {(item.quantity * item.price).toFixed(2)}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => handleRemoveItem(item.id)}
-                    className="text-red-500 hover:text-red-700 p-1"
-                    aria-label="Remove item"
-                  >
-                    ×
-                  </button>
+                <button
+                  onClick={() => handleRemoveItem(item.id)}
+                  style={{ color: '#ef4444', cursor: 'pointer', fontSize: 22, background: 'none', border: 'none', padding: '4px', marginLeft: 8 }}
+                  title="Remove item"
+                >
+                  ×
+                </button>
+                <div style={{ flexBasis: '100%', marginTop: 10 }}>
+                  <label htmlFor={`note-${item.id}`} style={{ fontSize: 13, color: '#555', fontWeight: 500, display: 'block', marginBottom: 2 }}>Note for this item:</label>
+                  <input
+                    id={`note-${item.id}`}
+                    type="text"
+                    value={itemNotes[item.id] || ''}
+                    onChange={e => setItemNotes(notes => ({ ...notes, [item.id]: e.target.value }))}
+                    placeholder="Add a note or special instruction..."
+                    style={{ width: '100%', border: '1px solid #e5e7eb', borderRadius: 6, padding: '7px 10px', fontSize: 14, color: '#333', background: '#f9fafb', marginBottom: 0 }}
+                  />
                 </div>
               </li>
             ))}
           </ul>
 
-          <div className="border-t pt-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Total</h3>
-              <p className="text-2xl font-bold">KES {cartTotal.toFixed(2)}</p>
-            </div>
-            <button
-              onClick={handleCheckout}
-              className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium"
-            >
-              Proceed to Checkout
-            </button>
+          <div style={{ borderTop: '2px solid #e5e7eb', paddingTop: '24px', marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 700, margin: 0, color: '#222' }}>Total</h3>
+            <p style={{ fontSize: '1.7rem', fontWeight: 700, margin: 0, color: '#16a34a' }}>{formatPrice(cartTotal)}</p>
           </div>
+          <button
+            onClick={handleCheckout}
+            style={{ width: '100%', backgroundColor: '#16a34a', color: 'white', padding: '16px 0', borderRadius: '10px', fontWeight: 600, fontSize: 18, border: 'none', cursor: 'pointer', marginBottom: 24, boxShadow: '0 2px 8px rgba(22,163,74,0.08)' }}
+          >
+            Proceed to Checkout
+          </button>
         </>
       )}
 
-      <hr className="my-8 border-gray-200" />
+      <hr style={{ margin: '40px 0', border: 'none', borderTop: '2px solid #e5e7eb' }} />
       
       <section>
-        <h3 className="text-xl font-bold mb-4">Your Order History</h3>
+        <h3 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '20px', color: '#222' }}>Your Order History</h3>
         {sales.length === 0 ? (
-          <p className="text-gray-500 py-4">No past purchases yet.</p>
+          <p style={{ color: '#6b7280', padding: '24px 0', fontSize: 16 }}>No past purchases yet.</p>
         ) : (
-          <ul className="space-y-4">
+          <ul style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '2rem',
+            padding: '2rem',
+            margin: 0,
+            background: 'transparent',
+            listStyle: 'none',
+          }}>
             {sales.map((sale, index) => (
-              <li key={index} className="border p-4 rounded-lg hover:bg-gray-50">
-                <div className="flex flex-col sm:flex-row justify-between gap-4">
-                  <div>
-                    <p className="text-sm text-gray-600">
-                      {new Date(sale.date).toLocaleString()}
-                    </p>
-                    <p className="font-medium">
-                      {sale.items.reduce((sum, item) => sum + item.quantity, 0)} items
-                    </p>
+              <li key={index} style={{
+                background: '#fff',
+                borderRadius: 12,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                padding: 24,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                minWidth: 0,
+                maxWidth: 340,
+                margin: '0 auto',
+                position: 'relative',
+              }}>
+                <div style={{ marginBottom: '14px', width: '100%' }}>
+                  <div style={{ minWidth: 180, marginBottom: 8 }}>
+                    <p style={{ fontSize: 13, color: '#666', margin: 0 }}>{new Date(sale.date).toLocaleString()}</p>
+                    <p style={{ fontWeight: 600, margin: 0, color: '#444', fontSize: 15 }}>{sale.items.reduce((sum, item) => sum + item.quantity, 0)} items</p>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <p className="text-lg font-bold">KES {sale.total.toFixed(2)}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', marginBottom: 8 }}>
+                    <p style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: '#2563eb', letterSpacing: '-1px' }}>{formatPrice(sale.total)}</p>
                     <button
                       onClick={() => handleReorder(sale.items)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                      style={{ backgroundColor: '#2563eb', color: 'white', padding: '8px 18px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 15, boxShadow: '0 1px 4px rgba(37,99,235,0.08)' }}
                     >
                       Reorder
                     </button>
                   </div>
                 </div>
+                {/* Images row */}
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 10, flexWrap: 'wrap' }}>
+                  {sale.items.map((item, idx) => {
+                    const product = products.find(p => p.id === item.productId || p.id === item.id) || {};
+                    return (
+                      <img
+                        key={idx}
+                        src={product.image || PLACEHOLDER_IMG}
+                        alt={item.name || 'Product'}
+                        style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: 8, border: '1px solid #eee', background: '#f5f5f5' }}
+                      />
+                    );
+                  })}
+                </div>
+                <ul style={{ fontSize: 15, color: '#444', margin: 0, padding: 0, borderTop: '1px solid #f0f0f0', paddingTop: 12, width: '100%', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {sale.items.map((item, idx) => {
+                    const product = products.find(p => p.id === item.productId || p.id === item.id) || {};
+                    return (
+                      <li key={idx} style={{ marginBottom: 10, padding: '8px 0', borderBottom: idx < sale.items.length - 1 ? '1px solid #f3f3f3' : 'none', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'flex-start', background: 'none' }}>
+                        <img src={product.image || PLACEHOLDER_IMG} alt={item.name || 'Product'} style={{ width: 38, height: 38, objectFit: 'cover', borderRadius: 8, border: '1px solid #eee', background: '#f5f5f5', marginRight: 8 }} />
+                        <div style={{ flex: 1, minWidth: 80, textAlign: 'left' }}>
+                          <div style={{ fontWeight: 600, color: '#222', fontSize: 15 }}>{item.name || 'Unknown'}</div>
+                          <div style={{ color: '#888', fontSize: 13 }}>Category: {product.category || item.category || 'N/A'}</div>
+                          <div style={{ color: '#555', fontSize: 14 }}>Qty: <span style={{ fontWeight: 600 }}>{item.quantity}</span></div>
+                        </div>
+                        <div style={{ minWidth: 70, textAlign: 'right', fontWeight: 700, color: '#16a34a', fontSize: 16, alignSelf: 'center' }}>{formatPrice(item.price * item.quantity)}</div>
+                      </li>
+                    );
+                  })}
+                </ul>
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      {/* Toast Message */}
+      {toast && (
+        <div style={{ position: 'fixed', top: 24, right: 24, backgroundColor: '#333', color: 'white', padding: '14px 28px', borderRadius: '10px', zIndex: 1000, fontSize: 17, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: 16 }}>
+          <span>{toast}</span>
+          {lastRemoved && (
+            <button
+              onClick={handleUndoRemove}
+              style={{ background: '#fff', color: '#2563eb', border: 'none', borderRadius: 6, padding: '6px 16px', fontWeight: 600, fontSize: 15, cursor: 'pointer', marginLeft: 12 }}
+            >
+              Undo
+            </button>
+          )}
+        </div>
+      )}
+
+      <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

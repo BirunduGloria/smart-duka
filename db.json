@@ -13,13 +13,19 @@
       "quantity": 1
     },
     {
-      "id": "bea0",
+      "id": "0551",
       "name": "Fresh Milk",
       "price": 100,
       "quantity": 2
     },
     {
-      "id": "585f",
+      "id": "56b0",
+      "name": "Fresh Milk",
+      "price": 100,
+      "quantity": 2
+    },
+    {
+      "id": "55ba",
       "name": "Bread",
       "price": 80,
       "quantity": 1
@@ -113,6 +119,91 @@
       ],
       "date": "2025-07-24T19:00:13.451Z",
       "total": 560
+    },
+    {
+      "id": "e577",
+      "items": [
+        {
+          "id": 1,
+          "name": "Milk",
+          "price": 2.5,
+          "quantity": 2,
+          "category": "Food",
+          "image": "https://i.pinimg.com/736x/79/81/eb/7981ebddff2991fd734b6390a58daeb1.jpg"
+        },
+        {
+          "id": 2,
+          "name": "Bread",
+          "price": 1.2,
+          "quantity": 1,
+          "category": "Food",
+          "image": "https://i.pinimg.com/736x/7f/ce/7a/7fce7afbf66cf7fa520a560eb50a6e8f.jpg"
+        },
+        {
+          "id": "bea0",
+          "name": "Fresh Milk",
+          "price": 100,
+          "quantity": 2,
+          "category": "N/A",
+          "image": ""
+        },
+        {
+          "id": "585f",
+          "name": "Bread",
+          "price": 80,
+          "quantity": 1,
+          "category": "N/A",
+          "image": ""
+        }
+      ],
+      "date": "2025-07-25T02:16:27.117Z",
+      "total": 286.2
+    },
+    {
+      "id": "47da",
+      "items": [
+        {
+          "id": 1,
+          "name": "Milk",
+          "price": 2.5,
+          "quantity": 2,
+          "category": "Food",
+          "image": "https://i.pinimg.com/736x/79/81/eb/7981ebddff2991fd734b6390a58daeb1.jpg"
+        },
+        {
+          "id": 2,
+          "name": "Bread",
+          "price": 1.2,
+          "quantity": 1,
+          "category": "Food",
+          "image": "https://i.pinimg.com/736x/7f/ce/7a/7fce7afbf66cf7fa520a560eb50a6e8f.jpg"
+        }
+      ],
+      "date": "2025-07-25T02:30:02.312Z",
+      "total": 6.2
+    },
+    {
+      "id": "3ebd",
+      "items": [
+        {
+          "id": 1,
+          "name": "Milk",
+          "price": 2.5,
+          "quantity": 2,
+          "category": "Food",
+          "image": "https://i.pinimg.com/736x/79/81/eb/7981ebddff2991fd734b6390a58daeb1.jpg"
+        },
+        {
+          "id": 2,
+          "name": "Bread",
+          "price": 1.2,
+          "quantity": 1,
+          "category": "Food",
+          "image": "https://i.pinimg.com/736x/7f/ce/7a/7fce7afbf66cf7fa520a560eb50a6e8f.jpg"
+        }
+      ],
+      "date": "2025-07-25T02:46:49.062Z",
+      "total": 6.2
     }
   ]
 }

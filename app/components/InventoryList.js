@@ -15,7 +15,7 @@ export default function InventoryList() {
   const [editFields, setEditFields] = useState({});
 
   useEffect(() => {
-    fetch('/data/products.json')
+    fetch('/products.json')
       .then(res => res.json())
       .then(data => setProducts(data));
   }, []);

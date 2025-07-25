@@ -22,7 +22,7 @@ Designed for small retail setups and duka owners, it supports inventory tracking
 ### Installation
 1. **Clone the repository:**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/BirunduGloria/smart-duka
    cd smart-duka
    ```
 2. **Install dependencies:**

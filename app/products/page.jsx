@@ -24,21 +24,8 @@ export default function ProductForm({ product, onSave, onCancel }) {
     }
   }, [product]);
 
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
-
-  const handleAddToCart = (product) => {
-    const updatedCart = [...cart, product];
-    setCart(updatedCart);
-    setMessage(`${product.name} added to cart!`);
-
-    setTimeout(() => setMessage(''), 2500);
-
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
-  };
-
-
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     if (name === 'price' || name === 'discount') {
       setFormData((prev) => ({
         ...prev,
@@ -65,12 +52,10 @@ export default function ProductForm({ product, onSave, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!formData.name.trim() || !formData.category.trim()) {
       alert('Name and Category are required');
       return;
     }
-
     onSave(formData);
   };
 
@@ -78,7 +63,6 @@ export default function ProductForm({ product, onSave, onCancel }) {
     <div className="modal-backdrop">
       <form onSubmit={handleSubmit} className="product-form">
         <h2>{product ? 'Edit' : 'Add'} Product</h2>
-
         <input
           name="name"
           value={formData.name}
@@ -87,7 +71,6 @@ export default function ProductForm({ product, onSave, onCancel }) {
           required
           className="form-input"
         />
-
         <input
           name="category"
           value={formData.category}
@@ -96,30 +79,6 @@ export default function ProductForm({ product, onSave, onCancel }) {
           required
           className="form-input"
         />
-
-        <div className="w-1/3">
- 
-          <label htmlFor="categoryFilter" className="block font-medium mb-1">
-            Filter by Category:
-          </label>
-
-          <select
-            id="categoryFilter"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="border p-2 w-full rounded"
-          >
-            <option value="">All</option>
-            {Array.from(new Set(products.map((p) => p.category))).map((cat, i) => (
-              <option key={i} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-
         <input
           type="number"
           name="price"
@@ -130,7 +89,6 @@ export default function ProductForm({ product, onSave, onCancel }) {
           step="0.01"
           className="form-input"
         />
-
         <input
           type="number"
           name="unitsInStock"
@@ -140,7 +98,6 @@ export default function ProductForm({ product, onSave, onCancel }) {
           min="0"
           className="form-input"
         />
-
         <input
           type="number"
           name="discount"
@@ -151,7 +108,6 @@ export default function ProductForm({ product, onSave, onCancel }) {
           max="100"
           className="form-input"
         />
-
         <input
           type="number"
           name="unitsSold"
@@ -161,7 +117,6 @@ export default function ProductForm({ product, onSave, onCancel }) {
           min="0"
           className="form-input"
         />
-
         <input
           type="date"
           name="expiryDate"
@@ -169,7 +124,6 @@ export default function ProductForm({ product, onSave, onCancel }) {
           onChange={handleChange}
           className="form-input"
         />
-
         <div className="button-group">
           <button type="button" onClick={onCancel} className="cancel-button">
             Cancel
@@ -178,37 +132,7 @@ export default function ProductForm({ product, onSave, onCancel }) {
             {product ? 'Update' : 'Add'}
           </button>
         </div>
-
-      )}
-
-
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {filteredProducts.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            isAdmin={isAdmin}
-            onAddToCart={handleAddToCart}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
-
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold">
-          🛒 Your Cart ({cart.length} items)
-        </h2>
-        <ul className="list-disc pl-6">
-          {cart.map((item, index) => (
-            <li key={index}>
-              {item.name} - ${item.price}
-            </li>
-          ))}
-        </ul>
-      </div>
-
+      </form>
     </div>
   );
 }

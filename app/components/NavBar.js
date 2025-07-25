@@ -26,14 +26,11 @@ export default function NavBar({ onSearch }) {
 
       <ul className="nav-links flex space-x-4">
         <li><Link href="/">Home</Link></li>
-        <li><Link href="/Products">products</Link></li>
+        <li><Link href="/products">Products</Link></li>
         <li><Link href="/cart">Cart</Link></li>
-        <li><Link href="/login">Login</Link></li>
-
         {user?.role === 'admin' && (
           <li><Link href="/inventory">Inventory</Link></li>
         )}
-
         {user ? (
           <li>
             <button onClick={handleLogout} className="text-red-600 hover:underline">

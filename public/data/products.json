@@ -1,5 +1,4 @@
 [
-  [
   {
     "id": 1,
     "name": "Milk",
@@ -135,6 +134,4 @@
     "inventory": { "unitsInStock": 35, "unitsSold": 110 },
     "expiryDate": "2046-03-30"
   }
-]
-
 ]

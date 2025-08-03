@@ -7,8 +7,6 @@ import { UserContext } from '.././context/UserContext';
 
 import Link from "next/link";
 import SearchBar from "./SearchBar";
-import "../globals.css";
-import Footer from './Footer';
 
 export default function NavBar({ onSearch, cartCount }) {
   const { user, setUser } = useContext(UserContext);
@@ -36,29 +34,66 @@ export default function NavBar({ onSearch, cartCount }) {
 
   return (
     <>
-      <nav className={`navbar p-4 border-b flex flex-col md:flex-row items-center justify-between gap-4 transition-transform duration-300 ${showNav ? '' : '-translate-y-full'}`} style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000 }}>
-        <div className="nav-logo text-xl font-bold">Smart Duka</div>
-        <SearchBar onSearch={onSearch} />
-        <ul className="nav-links flex space-x-4">
-          <li><Link href="/">Home</Link></li>
-          <li><Link href="/products">Products</Link></li>
-          <li><Link href="/cart">Cart ({cartCount || 0})</Link></li>
-          {user?.role === 'admin' && (
-            <li><Link href="/inventory">Inventory</Link></li>
-          )}
-          {user ? (
-            <li>
-              <button onClick={handleLogout} className="text-red-600 hover:underline">
+      <nav className="navbar">
+        <div className="navbar-container">
+          {/* Logo */}
+          <Link href="/" className="navbar-logo">
+            🛒 Smart Duka
+          </Link>
+
+          {/* Search Bar */}
+          <div className="hidden md:block flex-1 max-w-md mx-8">
+            <SearchBar onSearch={onSearch} />
+          </div>
+
+          {/* Navigation Links */}
+          <div className="navbar-links">
+            <Link href="/" className="navbar-link">
+              Home
+            </Link>
+            <Link href="/products" className="navbar-link">
+              Products
+            </Link>
+            <Link href="/cart" className="navbar-link relative">
+              Cart
+              {cartCount > 0 && (
+                <span className="cart-badge">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            {user?.role === 'admin' && (
+              <Link href="/inventory" className="navbar-link">
+                Inventory
+              </Link>
+            )}
+            {user ? (
+              <button 
+                onClick={handleLogout} 
+                className="navbar-button"
+              >
                 Logout
               </button>
-            </li>
-          ) : (
-            <li><Link href="/login">Login</Link></li>
-          )}
-        </ul>
+            ) : (
+              <Link 
+                href="/login" 
+                className="navbar-login"
+              >
+                Login
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button className="navbar-link">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </nav>
-      <div style={{ height: '70px' }} /> {/* Spacer for fixed navbar */}
-      <Footer />
     </>
   );
 }

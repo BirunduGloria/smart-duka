@@ -1,23 +1,24 @@
 import { useState } from 'react';
 import LoginForm from './LoginForm';
 import SignupForm from './SignUpForm';
-import '../../ashington-CSS/Login.css';
 
 function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <div className="auth-wrapper">
-      <div className={`auth-container ${isLogin ? '' : 'slide-left'}`}>
-        <div className="form-panel login-panel">
-          <LoginForm />
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="max-w-md w-full">
+        <div className="bg-white py-8 px-6 shadow-lg rounded-lg">
+          {isLogin ? <LoginForm /> : <SignupForm />}
         </div>
-        <div></div>
-      </div>
 
-      <button onClick={() => setIsLogin(!isLogin)} className="toggle-button">
-        {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Log in'}
-      </button>
+        <button 
+          onClick={() => setIsLogin(!isLogin)} 
+          className="mt-4 w-full text-center text-blue-600 hover:text-blue-500"
+        >
+          {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Log in'}
+        </button>
+      </div>
     </div>
   );
 }

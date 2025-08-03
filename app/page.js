@@ -1,178 +1,247 @@
 'use client';
-import { useState, useEffect } from 'react';
-import NavBar from '../app/components/NavBar';
-import SearchBar from '../app/components/SearchBar';
-import './globals.css';
-import LayoutWrapper from './LayoutWrapper';
-import Footer from './components/Footer';
-import { useUserContext } from './context/UserContext';
 
-function Home() {
-  const { user } = useUserContext();
-  const isAdmin = user?.role === 'admin';
+import { useState, useEffect, useContext } from 'react';
+import { UserContext } from './context/UserContext';
+import NavBar from './components/NavBar';
+import Footer from './components/Footer';
+import ProductCard from './components/ProductCard';
+
+export default function Home() {
+  const { user } = useContext(UserContext);
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [cart, setCart] = useState([]);
   const [currency, setCurrency] = useState('KES');
-  const [query, setQuery] = useState('');
-  const [cartCount, setCartCount] = useState(0);
-  const [allProducts, setAllProducts] = useState([]);
-  const conversionRate = 150;
-  const [today, setToday] = useState(null);
 
   useEffect(() => {
-    setToday(new Date());
+    // Simulate fetching products
+    const mockProducts = [
+      {
+        id: 1,
+        name: "Fresh Tomatoes",
+        price: 150,
+        image: "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400",
+        category: "Vegetables",
+        stock: 50,
+        expiryDate: "2024-02-15"
+      },
+      {
+        id: 2,
+        name: "Organic Bananas",
+        price: 200,
+        image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400",
+        category: "Fruits",
+        stock: 30,
+        expiryDate: "2024-02-10"
+      },
+      {
+        id: 3,
+        name: "Fresh Milk",
+        price: 120,
+        image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400",
+        category: "Dairy",
+        stock: 25,
+        expiryDate: "2024-02-08"
+      },
+      {
+        id: 4,
+        name: "Whole Grain Bread",
+        price: 80,
+        image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400",
+        category: "Bakery",
+        stock: 40,
+        expiryDate: "2024-02-12"
+      },
+      {
+        id: 5,
+        name: "Free Range Eggs",
+        price: 300,
+        image: "https://images.unsplash.com/photo-1569288063648-5d2196e4b6c0?w=400",
+        category: "Dairy",
+        stock: 60,
+        expiryDate: "2024-02-20"
+      },
+      {
+        id: 6,
+        name: "Organic Spinach",
+        price: 100,
+        image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400",
+        category: "Vegetables",
+        stock: 35,
+        expiryDate: "2024-02-09"
+      }
+    ];
+    setProducts(mockProducts);
+    setFilteredProducts(mockProducts);
   }, []);
 
- const daysFromToday = (dateStr) => {
-  if (!today) return Infinity;
-  const expiry = new Date(dateStr);
-  return (expiry - today) / (1000 * 60 * 60 * 24);
-};
-    
-
-  const loadCart = () => {
-    if (typeof window === 'undefined') return [];
-    return JSON.parse(localStorage.getItem('cart')) || [];
-  };
-
-  const saveCart = (cart) => {
-    localStorage.setItem('cart', JSON.stringify(cart));
+  const handleSearch = (query) => {
+    if (!query.trim()) {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product =>
+        product.name.toLowerCase().includes(query.toLowerCase()) ||
+        product.category.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
   };
 
   const addToCart = (product) => {
-    const cart = loadCart();
-    const existing = cart.find((item) => item.id === product.id);
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({ ...product, quantity: 1 });
-    }
-    saveCart(cart);
-    setCartCount(cart.reduce((sum, item) => sum + item.quantity, 0));
-    alert(`${product.name} added to cart`);
-  };
-
-  useEffect(() => {
-    const cart = loadCart();
-    setCartCount(cart.reduce((sum, item) => sum + item.quantity, 0));
-  }, []);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch('/data/products.json');
-        const data = await res.json();
-        setAllProducts(data);
-      } catch (err) {
-        console.error('Failed to load products:', err);
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.id === product.id);
+      if (existingItem) {
+        return prevCart.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      } else {
+        return [...prevCart, { ...product, quantity: 1 }];
       }
-    };
-    fetchProducts();
-  }, []);
-
-  const handleSearch = (searchTerm) => {
-    setQuery(searchTerm.toLowerCase());
+    });
   };
-
-  const filteredProducts = allProducts.filter((p) =>
-    p.name.toLowerCase().includes(query)
-  );
 
   const formatPrice = (price) => {
-    const converted = currency === 'USD' ? (price / conversionRate).toFixed(2) : price;
-    return currency === 'USD' ? `$ ${converted}` : `KSh ${converted}`;
+    const exchangeRate = currency === 'USD' ? 0.007 : 1;
+    const convertedPrice = price * exchangeRate;
+    const symbol = currency === 'USD' ? '$' : 'KSh';
+    return `${symbol}${convertedPrice.toFixed(2)}`;
   };
+
+  const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
     <>
       <NavBar onSearch={handleSearch} cartCount={cartCount} />
+      
       <main className="main-container">
-        <div className="header-section standout-header">
-          <h1>Welcome to Smart-Duka</h1>
-          <div className="currency-selector">
-            <label>Currency:</label>
-            <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
-              <option value="KES">KES</option>
-              <option value="USD">USD</option>
-            </select>
+        {/* Header Section */}
+        <div className="header-section">
+          <div className="standout-header">
+            <h1 className="text-4xl font-bold mb-4">Welcome to Smart-Duka</h1>
+            <p className="text-xl mb-6">Discover amazing products at unbeatable prices</p>
+            
+            {/* Currency Selector */}
+            <div className="currency-selector">
+              <label className="font-medium">Currency:</label>
+              <select 
+                value={currency} 
+                onChange={(e) => setCurrency(e.target.value)}
+              >
+                <option value="KES">KES</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
           </div>
         </div>
-        <section className="section standout-section">
-          <h2>Featured Products</h2>
-          <ul className="product-grid standout-grid">
-            {filteredProducts
-              .filter((p) => p.pricing.discount > 0)
-              .map((product) => (
-                <li key={product.id} className="product-card standout-card">
+
+        {/* Featured Products Section */}
+        <section className="standout-section">
+          <div className="max-w-6xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Featured Products</h2>
+            <div className="standout-grid">
+              {filteredProducts.map((product) => (
+                <div key={product.id} className="standout-card">
                   <div className="image-container">
-                    <img src={product.image} alt={product.name} />
-                    <span className="discount-badge">
-                      -{(product.pricing.discount * 100).toFixed(0)}%
-                    </span>
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                    />
+                    {product.stock < 10 && (
+                      <div className="discount-badge">
+                        Low Stock
+                      </div>
+                    )}
                   </div>
-                  <p className="product-name">{product.name}</p>
-                  <p className="product-price">{formatPrice(product.pricing.price)}</p>
-                  <button className="add-btn" onClick={() => addToCart(product)}>Add to Cart</button>
-                </li>
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">{product.name}</h3>
+                    <p className="text-gray-600 mb-2">{product.category}</p>
+                    <p className="text-2xl font-bold text-blue-600 mb-3">{formatPrice(product.price)}</p>
+                    <button 
+                      onClick={() => addToCart(product)}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
               ))}
-          </ul>
+            </div>
+          </div>
         </section>
-        <section className="section standout-section">
-          <h2>Fast Selling Products</h2>
-          <ul className="product-grid standout-grid">
-            {filteredProducts
-              .filter((p) => p.inventory.unitsSold > 50)
-              .map((product) => (
-                <li key={product.id} className="product-card standout-card">
-                  <img src={product.image} alt={product.name} />
-                  <p className="product-name">{product.name}</p>
-                  <p className="product-price">{formatPrice(product.pricing.price)}</p>
-                  <p className="product-units">{product.inventory.unitsSold} units sold</p>
-                  <button className="add-btn" onClick={() => addToCart(product)}>Add to Cart</button>
-                </li>
+
+        {/* Fast Selling Products */}
+        <section className="standout-section">
+          <div className="max-w-6xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Fast Selling Products</h2>
+            <div className="standout-grid">
+              {filteredProducts.slice(0, 3).map((product) => (
+                <div key={product.id} className="standout-card">
+                  <div className="image-container">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                    />
+                    <div className="discount-badge">
+                      Popular
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">{product.name}</h3>
+                    <p className="text-gray-600 mb-2">{product.category}</p>
+                    <p className="text-2xl font-bold text-green-600 mb-3">{formatPrice(product.price)}</p>
+                    <button 
+                      onClick={() => addToCart(product)}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
               ))}
-          </ul>
+            </div>
+          </div>
         </section>
-        {/* Admin-only sections below */}
-        {isAdmin && (
-          <>
-            <section className="section standout-section">
-              <h2>Smart Stock Alerts</h2>
-              <ul className="alert-list standout-alert">
-                {filteredProducts
-                  .filter((p) => p.inventory.unitsInStock < 5)
-                  .map((product) => (
-                    <li key={product.id}>
-                      <span className="product-name">{product.name}</span> – only {product.inventory.unitsInStock} left
-                      <button className="add-btn" onClick={() => addToCart(product)}>Add to Cart</button>
-                    </li>
-                  ))}
-              </ul>
-            </section>
-            {today && (
-              <section className="section standout-section">
-                <h2>Expiring Soon</h2>
-                <ul className="alert-list standout-alert expiring">
-                  {filteredProducts
-                    .filter((p) => daysFromToday(p.expiryDate) <= 7)
-                    .map((product) => (
-                      <li key={product.id}>
-                        <span className="product-name">{product.name}</span> – expiring soon ({product.expiryDate})
-                      </li>
-                    ))}
-                </ul>
-              </section>
-            )}
-          </>
-        )}
+
+        {/* Smart Stock Alerts */}
+        <section className="standout-section">
+          <div className="max-w-6xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Smart Stock Alerts</h2>
+            <div className="standout-alert">
+              <h3 className="text-xl font-semibold text-yellow-800 mb-4">Low Stock Items</h3>
+              <div className="space-y-2">
+                {filteredProducts.filter(p => p.stock < 10).map((product) => (
+                  <div key={product.id} className="flex justify-between items-center bg-white p-3 rounded">
+                    <span className="font-medium">{product.name}</span>
+                    <span className="text-red-600 font-bold">Only {product.stock} left!</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Expiring Soon */}
+        <section className="standout-section">
+          <div className="max-w-6xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Expiring Soon</h2>
+            <div className="standout-alert">
+              <h3 className="text-xl font-semibold text-red-800 mb-4">Items Expiring This Week</h3>
+              <div className="space-y-2">
+                {filteredProducts.slice(0, 2).map((product) => (
+                  <div key={product.id} className="flex justify-between items-center bg-white p-3 rounded">
+                    <span className="font-medium">{product.name}</span>
+                    <span className="text-red-600 font-bold">Expires: {product.expiryDate}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
+      
       <Footer />
     </>
-  );
-}
-
-export default function HomePage() {
-  return (
-    <LayoutWrapper>
-      <Home />
-    </LayoutWrapper>
   );
 }

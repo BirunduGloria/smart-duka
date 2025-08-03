@@ -3,7 +3,6 @@
 import { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserContext } from '../.././context/UserContext';
-import '../../ashington-CSS/login.css';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -36,34 +35,44 @@ function LoginForm() {
   };
 
   return (
-    <div className="modern-login-bg">
-      <form onSubmit={handleLogin} className="modern-login-card">
-        <h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Login</h2>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="bg-white py-8 px-6 shadow-lg rounded-lg">
+          <h2 className="text-center text-3xl font-bold text-gray-900 mb-6">Login</h2>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+          <form onSubmit={handleLogin} className="space-y-6">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{ marginTop: '1rem' }}
-        />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
 
-        <button type="submit" style={{ marginTop: '1.5rem' }}>Log In</button>
+            <button 
+              type="submit" 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md"
+            >
+              Log In
+            </button>
 
-        <div className="links" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-          <a href="/forgot-password">Forgot password?</a>
-          <a href="/admin">Admin</a>
+            <div className="flex justify-between text-sm">
+              <a href="/forgot-password" className="text-blue-600 hover:text-blue-500">Forgot password?</a>
+              <a href="/admin" className="text-blue-600 hover:text-blue-500">Admin</a>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

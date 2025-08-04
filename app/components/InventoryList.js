@@ -146,10 +146,10 @@ export default function InventoryList() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Inventory Management</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Inventory Management</h1>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-300"
         >
           Add Product
         </button>
@@ -158,21 +158,21 @@ export default function InventoryList() {
       {/* Stats Overview */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-blue-50 p-4 rounded">
-            <h3 className="font-medium">Total Products</h3>
-            <p className="text-2xl font-bold">{stats.totalProducts}</p>
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <h3 className="font-medium text-blue-800">Total Products</h3>
+            <p className="text-2xl font-bold text-blue-600">{stats.totalProducts}</p>
           </div>
-          <div className="bg-green-50 p-4 rounded">
-            <h3 className="font-medium">Total Stock</h3>
-            <p className="text-2xl font-bold">{stats.totalStock}</p>
+          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+            <h3 className="font-medium text-green-800">Total Stock</h3>
+            <p className="text-2xl font-bold text-green-600">{stats.totalStock}</p>
           </div>
-          <div className="bg-yellow-50 p-4 rounded">
-            <h3 className="font-medium">Low Stock Items</h3>
-            <p className="text-2xl font-bold">{stats.lowStockItems}</p>
+          <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+            <h3 className="font-medium text-yellow-800">Low Stock Items</h3>
+            <p className="text-2xl font-bold text-yellow-600">{stats.lowStockItems}</p>
           </div>
-          <div className="bg-red-50 p-4 rounded">
-            <h3 className="font-medium">Expiring Soon</h3>
-            <p className="text-2xl font-bold">{stats.expiringSoon}</p>
+          <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+            <h3 className="font-medium text-red-800">Expiring Soon</h3>
+            <p className="text-2xl font-bold text-red-600">{stats.expiringSoon}</p>
           </div>
         </div>
       )}
@@ -189,19 +189,19 @@ export default function InventoryList() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
-          <div key={product.id} className="bg-white p-6 rounded-lg shadow-md">
+          <div key={product.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-300">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold">{product.name}</h3>
+              <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
               <div className="flex space-x-2">
                 <button
                   onClick={() => handleAddQuantity(product.id)}
-                  className="bg-green-500 text-white px-2 py-1 rounded text-sm hover:bg-green-600"
+                  className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-sm transition-colors duration-300"
                 >
                   +1
                 </button>
                 <button
                   onClick={() => handleEditProduct(product)}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm transition-colors duration-300"
                 >
                   Edit
                 </button>
@@ -215,7 +215,7 @@ export default function InventoryList() {
                   name="name"
                   value={editFields.name}
                   onChange={handleEditFieldChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   placeholder="Product name"
                 />
                 <input
@@ -223,7 +223,7 @@ export default function InventoryList() {
                   name="category"
                   value={editFields.category}
                   onChange={handleEditFieldChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   placeholder="Category"
                 />
                 <input
@@ -231,7 +231,7 @@ export default function InventoryList() {
                   name="unitsInStock"
                   value={editFields.unitsInStock}
                   onChange={handleEditFieldChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   placeholder="Stock"
                 />
                 <input
@@ -239,19 +239,19 @@ export default function InventoryList() {
                   name="price"
                   value={editFields.price}
                   onChange={handleEditFieldChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   placeholder="Price"
                 />
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleSaveEdit(product.id)}
-                    className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
+                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition-colors duration-300"
                   >
                     Save
                   </button>
                   <button
                     onClick={handleCancelEdit}
-                    className="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600"
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm transition-colors duration-300"
                   >
                     Cancel
                   </button>
@@ -272,11 +272,11 @@ export default function InventoryList() {
                         type="number"
                         value={newPrice}
                         onChange={(e) => setNewPrice(e.target.value)}
-                        className="w-20 p-1 border rounded text-sm"
+                        className="w-20 p-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none"
                       />
                       <button
                         onClick={() => handleSavePrice(product.id)}
-                        className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
+                        className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs transition-colors duration-300"
                       >
                         Save
                       </button>
@@ -284,7 +284,7 @@ export default function InventoryList() {
                   ) : (
                     <button
                       onClick={() => handleEditPrice(product.id, product.pricing.price)}
-                      className="text-blue-500 hover:text-blue-700 text-sm"
+                      className="text-blue-500 hover:text-blue-700 text-sm transition-colors duration-300"
                     >
                       Edit Price
                     </button>

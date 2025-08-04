@@ -1,34 +1,47 @@
-import React from 'react';
+import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="footer">
-      <div className="footer-content">
-        <div className="mb-6">
-          <h3 className="text-2xl font-bold mb-2">🛒 Smart Duka</h3>
-          <p className="text-gray-300">Your one-stop shop for everything you need</p>
-        </div>
-        
-        <div className="footer-links">
-          <a href="#" className="footer-link">
+    <footer style={{ 
+      background: 'linear-gradient(to right, #1f2937, #1e3a8a)', 
+      color: 'white', 
+      padding: '32px 0',
+      marginTop: 'auto'
+    }}>
+      <div style={{ maxWidth: '1152px', margin: '0 auto', padding: '0 16px', textAlign: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '16px' }}>
+          <Link href="/about" style={{ 
+            color: '#d1d5db', 
+            textDecoration: 'none',
+            transition: 'color 0.3s ease'
+          }}>
             About Us
-          </a>
-          <a href="#" className="footer-link">
+          </Link>
+          <Link href="/contact" style={{ 
+            color: '#d1d5db', 
+            textDecoration: 'none',
+            transition: 'color 0.3s ease'
+          }}>
             Contact
-          </a>
-          <a href="#" className="footer-link">
+          </Link>
+          <Link href="/privacy" style={{ 
+            color: '#d1d5db', 
+            textDecoration: 'none',
+            transition: 'color 0.3s ease'
+          }}>
             Privacy Policy
-          </a>
-          <a href="#" className="footer-link">
+          </Link>
+          <Link href="/terms" style={{ 
+            color: '#d1d5db', 
+            textDecoration: 'none',
+            transition: 'color 0.3s ease'
+          }}>
             Terms of Service
-          </a>
+          </Link>
         </div>
-        
-        <div className="border-t border-gray-700 pt-6">
-          <p className="text-gray-400">
-            &copy; {new Date().getFullYear()} Smart Duka. All rights reserved.
-          </p>
-        </div>
+        <p style={{ color: '#9ca3af' }}>
+          © 2024 Smart Duka. All rights reserved.
+        </p>
       </div>
     </footer>
   );

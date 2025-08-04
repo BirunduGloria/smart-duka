@@ -15,16 +15,39 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Load cart from localStorage on component mount
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
+  }, []);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    console.log('Main page - Saving cart to localStorage:', cart);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    // Dispatch custom event to notify other pages
+    window.dispatchEvent(new Event('cartUpdated'));
+  }, [cart]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError(null);
+        console.log('Fetching products from /data/products.json...');
+        
         const response = await fetch('/data/products.json');
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch products');
+          throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`);
         }
+        
         const productsData = await response.json();
+        console.log('Products data loaded:', productsData.length, 'products');
         
         // Transform the data to match the expected format
         const transformedProducts = productsData.map(product => ({
@@ -38,11 +61,12 @@ export default function Home() {
           discount: product.pricing.discount
         }));
         
+        console.log('Transformed products:', transformedProducts.length, 'products');
         setProducts(transformedProducts);
         setFilteredProducts(transformedProducts);
       } catch (err) {
-        setError('Failed to load products');
         console.error('Error loading products:', err);
+        setError(`Failed to load products: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -78,6 +102,25 @@ export default function Home() {
     });
   };
 
+  const removeFromCart = (productId) => {
+    setCart(prevCart => prevCart.filter(item => item.id !== productId));
+  };
+
+  const updateQuantity = (productId, newQuantity) => {
+    setCart(prevCart => 
+      prevCart.map(item => 
+        item.id === productId 
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    );
+  };
+
+  const getCartQuantity = (productId) => {
+    const cartItem = cart.find(item => item.id === productId);
+    return cartItem ? cartItem.quantity : 0;
+  };
+
   const formatPrice = (price) => {
     const exchangeRate = currency === 'USD' ? 0.007 : 1;
     const convertedPrice = price * exchangeRate;
@@ -89,12 +132,12 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <NavBar cartCount={cartCount} />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading products...</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ animation: 'spin 1s linear infinite', borderRadius: '50%', height: '48px', width: '48px', borderBottom: '2px solid #3b82f6', margin: '0 auto' }}></div>
+            <p style={{ marginTop: '16px', color: '#6b7280' }}>Loading products...</p>
           </div>
         </div>
       </div>
@@ -103,15 +146,15 @@ export default function Home() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <NavBar cartCount={cartCount} />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="text-red-500 text-xl mb-4">⚠️</div>
-            <p className="text-gray-600">{error}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '20px', color: '#ef4444', marginBottom: '16px' }}>⚠️</div>
+            <p style={{ color: '#6b7280' }}>{error}</p>
             <button 
               onClick={() => window.location.reload()} 
-              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              style={{ marginTop: '16px', backgroundColor: '#3b82f6', color: 'white', padding: '8px 16px', borderRadius: '4px' }}
             >
               Try Again
             </button>
@@ -125,111 +168,160 @@ export default function Home() {
     <>
       <NavBar onSearch={handleSearch} cartCount={cartCount} />
       
-      <main className="main-container">
+      <main className="flex-1 pt-8 pb-8">
         {/* Header Section */}
-        <div className="header-section">
-          <div className="standout-header">
-            <h1 className="text-4xl font-bold mb-4">Welcome to Smart-Duka</h1>
-            <p className="text-xl mb-6">Discover amazing products at unbeatable prices</p>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <div style={{ 
+            background: 'linear-gradient(135deg, #1e3a8a 0%, #1f2937 50%, #3b82f6 100%)', 
+            color: 'white', 
+            padding: '48px 32px', 
+            borderRadius: '20px', 
+            marginBottom: '32px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.3)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Animated background elements */}
+            <div style={{
+              position: 'absolute',
+              top: '-50%',
+              left: '-50%',
+              width: '200%',
+              height: '200%',
+              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%)',
+              animation: 'pulse 3s ease-in-out infinite'
+            }}></div>
+            
+            <h1 style={{ 
+              fontSize: '48px', 
+              fontWeight: 'bold', 
+              marginBottom: '16px',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+              position: 'relative',
+              zIndex: 1
+            }}>Welcome to Smart-Duka</h1>
+            <p style={{ 
+              fontSize: '24px', 
+              marginBottom: '24px',
+              textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+              position: 'relative',
+              zIndex: 1
+            }}>Discover amazing products at unbeatable prices</p>
             
             {/* Currency Selector */}
-            <div className="currency-selector">
-              <label className="font-medium">Currency:</label>
+            <div style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              backgroundColor: 'rgba(255, 255, 255, 0.15)', 
+              padding: '12px 20px', 
+              borderRadius: '12px', 
+              marginTop: '16px',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              position: 'relative',
+              zIndex: 1
+            }}>
+              <label style={{ fontWeight: '600', color: 'white' }}>Currency:</label>
               <select 
                 value={currency} 
                 onChange={(e) => setCurrency(e.target.value)}
+                style={{ 
+                  backgroundColor: 'rgba(0, 0, 0, 0.3)', 
+                  color: 'white', 
+                  border: '1px solid rgba(255, 255, 255, 0.3)', 
+                  outline: 'none', 
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  minWidth: '80px'
+                }}
               >
-                <option value="KES">KES</option>
-                <option value="USD">USD</option>
+                <option value="KES" style={{ backgroundColor: '#1e3a8a', color: 'white' }}>KES</option>
+                <option value="USD" style={{ backgroundColor: '#1e3a8a', color: 'white' }}>USD</option>
               </select>
             </div>
           </div>
         </div>
 
         {/* Featured Products Section */}
-        <section className="standout-section">
-          <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Featured Products</h2>
-            <div className="standout-grid">
-              {filteredProducts.map((product) => (
-                <div key={product.id} className="standout-card">
-                  <div className="image-container">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                    />
-                    {product.stock < 10 && (
-                      <div className="discount-badge">
-                        Low Stock
-                      </div>
-                    )}
-                    {product.discount > 0 && (
-                      <div className="discount-badge">
-                        {Math.round(product.discount * 100)}% OFF
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">{product.name}</h3>
-                    <p className="text-gray-600 mb-2">{product.category}</p>
-                    <p className="text-2xl font-bold text-blue-600 mb-3">{formatPrice(product.price)}</p>
-                    <button 
-                      onClick={() => addToCart(product)}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Fast Selling Products */}
-        <section className="standout-section">
-          <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Fast Selling Products</h2>
-            <div className="standout-grid">
-              {filteredProducts.slice(0, 3).map((product) => (
-                <div key={product.id} className="standout-card">
-                  <div className="image-container">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                    />
-                    <div className="discount-badge">
-                      Popular
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">{product.name}</h3>
-                    <p className="text-gray-600 mb-2">{product.category}</p>
-                    <p className="text-2xl font-bold text-green-600 mb-3">{formatPrice(product.price)}</p>
-                    <button 
-                      onClick={() => addToCart(product)}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              ))}
+        <section className="mb-12">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 style={{ 
+              fontSize: '30px', 
+              fontWeight: 'bold', 
+              color: 'white', 
+              marginBottom: '24px', 
+              textAlign: 'center',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+            }}>Featured Products</h2>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '16px',
+              justifyContent: 'center',
+              maxWidth: '1200px',
+              margin: '0 auto'
+            }}>
+                              {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={addToCart}
+                    onRemoveFromCart={removeFromCart}
+                    onUpdateQuantity={updateQuantity}
+                    cartQuantity={getCartQuantity(product.id)}
+                    formatPrice={formatPrice}
+                  />
+                ))}
             </div>
           </div>
         </section>
 
         {/* Smart Stock Alerts */}
-        <section className="standout-section">
-          <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Smart Stock Alerts</h2>
-            <div className="standout-alert">
-              <h3 className="text-xl font-semibold text-yellow-800 mb-4">Low Stock Items</h3>
-              <div className="space-y-2">
+        <section style={{ marginBottom: '48px' }}>
+          <div style={{ maxWidth: '1152px', margin: '0 auto', padding: '0 16px' }}>
+            <h2 style={{ 
+              fontSize: '30px', 
+              fontWeight: 'bold', 
+              color: 'white', 
+              marginBottom: '24px', 
+              textAlign: 'center',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+            }}>Smart Stock Alerts</h2>
+            <div style={{ 
+              background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #f59e0b 100%)', 
+              border: '2px solid #f59e0b', 
+              borderRadius: '12px', 
+              padding: '24px',
+              boxShadow: '0 10px 25px rgba(245, 158, 11, 0.3)'
+            }}>
+              <h3 style={{ 
+                fontSize: '20px', 
+                fontWeight: '600', 
+                color: '#92400e', 
+                marginBottom: '16px',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
+              }}>Low Stock Items</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {filteredProducts.filter(p => p.stock < 10).map((product) => (
-                  <div key={product.id} className="flex justify-between items-center bg-white p-3 rounded">
-                    <span className="font-medium">{product.name}</span>
-                    <span className="text-red-600 font-bold">Only {product.stock} left!</span>
+                  <div key={product.id} style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    backgroundColor: 'white', 
+                    padding: '12px', 
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    transition: 'transform 0.2s ease'
+                  }}
+                  onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                  onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                  >
+                    <span style={{ fontWeight: '500', color: '#374151' }}>{product.name}</span>
+                    <span style={{ color: '#dc2626', fontWeight: 'bold', fontSize: '14px' }}>Only {product.stock} left!</span>
                   </div>
                 ))}
               </div>
@@ -238,16 +330,47 @@ export default function Home() {
         </section>
 
         {/* Expiring Soon */}
-        <section className="standout-section">
-          <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Expiring Soon</h2>
-            <div className="standout-alert">
-              <h3 className="text-xl font-semibold text-red-800 mb-4">Items Expiring This Week</h3>
-              <div className="space-y-2">
+        <section style={{ marginBottom: '48px' }}>
+          <div style={{ maxWidth: '1152px', margin: '0 auto', padding: '0 16px' }}>
+            <h2 style={{ 
+              fontSize: '30px', 
+              fontWeight: 'bold', 
+              color: 'white', 
+              marginBottom: '24px', 
+              textAlign: 'center',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+            }}>Expiring Soon</h2>
+            <div style={{ 
+              background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 50%, #f87171 100%)', 
+              border: '2px solid #f87171', 
+              borderRadius: '12px', 
+              padding: '24px',
+              boxShadow: '0 10px 25px rgba(248, 113, 113, 0.3)'
+            }}>
+              <h3 style={{ 
+                fontSize: '20px', 
+                fontWeight: '600', 
+                color: '#991b1b', 
+                marginBottom: '16px',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
+              }}>Items Expiring This Week</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {filteredProducts.filter(p => p.expiryDate && new Date(p.expiryDate) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)).slice(0, 3).map((product) => (
-                  <div key={product.id} className="flex justify-between items-center bg-white p-3 rounded">
-                    <span className="font-medium">{product.name}</span>
-                    <span className="text-red-600 font-bold">Expires: {product.expiryDate}</span>
+                  <div key={product.id} style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    backgroundColor: 'white', 
+                    padding: '12px', 
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    transition: 'transform 0.2s ease'
+                  }}
+                  onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                  onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                  >
+                    <span style={{ fontWeight: '500', color: '#374151' }}>{product.name}</span>
+                    <span style={{ color: '#dc2626', fontWeight: 'bold', fontSize: '14px' }}>Expires: {product.expiryDate}</span>
                   </div>
                 ))}
               </div>

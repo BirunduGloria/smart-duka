@@ -60,75 +60,129 @@ export default function ProductForm({ product, onSave, onCancel }) {
   };
 
   return (
-    <div className="modal-backdrop">
-      <form onSubmit={handleSubmit} className="product-form">
-        <h2>{product ? 'Edit' : 'Add'} Product</h2>
-        <input
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Product Name"
-          required
-          className="form-input"
-        />
-        <input
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-          placeholder="Category"
-          required
-          className="form-input"
-        />
-        <input
-          type="number"
-          name="price"
-          value={formData.pricing.price}
-          onChange={handleChange}
-          placeholder="Price"
-          min="0"
-          step="0.01"
-          className="form-input"
-        />
-        <input
-          type="number"
-          name="unitsInStock"
-          value={formData.inventory.unitsInStock}
-          onChange={handleChange}
-          placeholder="Units in Stock"
-          min="0"
-          className="form-input"
-        />
-        <input
-          type="number"
-          name="discount"
-          value={formData.pricing.discount}
-          onChange={handleChange}
-          placeholder="Discount (%)"
-          min="0"
-          max="100"
-          className="form-input"
-        />
-        <input
-          type="number"
-          name="unitsSold"
-          value={formData.inventory.unitsSold}
-          onChange={handleChange}
-          placeholder="Units Sold"
-          min="0"
-          className="form-input"
-        />
-        <input
-          type="date"
-          name="expiryDate"
-          value={formData.expiryDate}
-          onChange={handleChange}
-          className="form-input"
-        />
-        <div className="button-group">
-          <button type="button" onClick={onCancel} className="cancel-button">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 shadow-2xl w-full max-w-md mx-4">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          {product ? 'Edit' : 'Add'} Product
+        </h2>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Product Name
+            </label>
+            <input
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter product name"
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Category
+            </label>
+            <input
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              placeholder="Enter category"
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Price
+            </label>
+            <input
+              type="number"
+              name="price"
+              value={formData.pricing.price}
+              onChange={handleChange}
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Units in Stock
+            </label>
+            <input
+              type="number"
+              name="unitsInStock"
+              value={formData.inventory.unitsInStock}
+              onChange={handleChange}
+              placeholder="0"
+              min="0"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Discount (%)
+            </label>
+            <input
+              type="number"
+              name="discount"
+              value={formData.pricing.discount}
+              onChange={handleChange}
+              placeholder="0"
+              min="0"
+              max="100"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Units Sold
+            </label>
+            <input
+              type="number"
+              name="unitsSold"
+              value={formData.inventory.unitsSold}
+              onChange={handleChange}
+              placeholder="0"
+              min="0"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Expiry Date
+            </label>
+            <input
+              type="date"
+              name="expiryDate"
+              value={formData.expiryDate}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-300"
+            />
+          </div>
+        </div>
+        
+        <div className="flex space-x-4 mt-6">
+          <button 
+            type="button" 
+            onClick={onCancel} 
+            className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300"
+          >
             Cancel
           </button>
-          <button type="submit" className="submit-button">
+          <button 
+            type="submit" 
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300"
+          >
             {product ? 'Update' : 'Add'}
           </button>
         </div>

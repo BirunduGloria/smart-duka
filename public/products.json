@@ -1,6 +1,60 @@
 [
   {
     "id": 1,
+    "name": "Fresh Tomatoes",
+    "category": "Vegetables",
+    "image": "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400",
+    "pricing": { "price": 150, "discount": 0 },
+    "inventory": { "unitsInStock": 50, "unitsSold": 25 },
+    "expiryDate": "2024-02-15"
+  },
+  {
+    "id": 2,
+    "name": "Organic Bananas",
+    "category": "Fruits",
+    "image": "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400",
+    "pricing": { "price": 200, "discount": 0.1 },
+    "inventory": { "unitsInStock": 30, "unitsSold": 15 },
+    "expiryDate": "2024-02-10"
+  },
+  {
+    "id": 3,
+    "name": "Fresh Milk",
+    "category": "Dairy",
+    "image": "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400",
+    "pricing": { "price": 120, "discount": 0 },
+    "inventory": { "unitsInStock": 25, "unitsSold": 40 },
+    "expiryDate": "2024-02-08"
+  },
+  {
+    "id": 4,
+    "name": "Whole Grain Bread",
+    "category": "Bakery",
+    "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400",
+    "pricing": { "price": 80, "discount": 0.05 },
+    "inventory": { "unitsInStock": 40, "unitsSold": 30 },
+    "expiryDate": "2024-02-12"
+  },
+  {
+    "id": 5,
+    "name": "Free Range Eggs",
+    "category": "Dairy",
+    "image": "https://images.unsplash.com/photo-1569288063648-5d2196e4b6c0?w=400",
+    "pricing": { "price": 300, "discount": 0 },
+    "inventory": { "unitsInStock": 60, "unitsSold": 45 },
+    "expiryDate": "2024-02-20"
+  },
+  {
+    "id": 6,
+    "name": "Organic Spinach",
+    "category": "Vegetables",
+    "image": "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400",
+    "pricing": { "price": 100, "discount": 0.15 },
+    "inventory": { "unitsInStock": 35, "unitsSold": 20 },
+    "expiryDate": "2024-02-09"
+  },
+  {
+    "id": 7,
     "name": "Milk",
     "category": "Food",
     "image": "https://i.pinimg.com/736x/79/81/eb/7981ebddff2991fd734b6390a58daeb1.jpg",
@@ -9,7 +63,7 @@
     "expiryDate": "2025-08-01"
   },
   {
-    "id": 2,
+    "id": 8,
     "name": "Bread",
     "category": "Food",
     "image": "https://i.pinimg.com/736x/7f/ce/7a/7fce7afbf66cf7fa520a560eb50a6e8f.jpg",
@@ -18,7 +72,7 @@
     "expiryDate": "2026-07-25"
   },
   {
-    "id": 3,
+    "id": 9,
     "name": "Eggs",
     "category": "Food",
     "image": "https://i.pinimg.com/736x/1b/3e/0b/1b3e0b856b8937e09353290c7f9e3f88.jpg",
@@ -27,7 +81,7 @@
     "expiryDate": "2026-07-28"
   },
   {
-    "id": 4,
+    "id": 10,
     "name": "T-Shirt",
     "category": "Fashion",
     "image": "https://i.pinimg.com/736x/27/b5/a1/27b5a1602087a7113d58118e357bdc54.jpg",
@@ -36,7 +90,7 @@
     "expiryDate": "2039-01-30"
   },
   {
-    "id": 5,
+    "id": 11,
     "name": "Sneakers",
     "category": "Fashion",
     "image": "https://i.pinimg.com/736x/74/3a/37/743a37f67414e356b5c0e21438d09b93.jpg",
@@ -45,7 +99,7 @@
     "expiryDate": null
   },
   {
-    "id": 6,
+    "id": 12,
     "name": "Smartphone",
     "category": "Electronics",
     "image": "https://i.pinimg.com/736x/10/70/04/1070045a0a4cf93fa3f65476dd0af581.jpg",
@@ -54,7 +108,7 @@
     "expiryDate": "2033-06-30"
   },
   {
-    "id": 7,
+    "id": 13,
     "name": "Bluetooth Headphones",
     "category": "Electronics",
     "image": "https://i.pinimg.com/736x/cc/62/06/cc6206921ad8078367b874fd3b3d1541.jpg",
@@ -63,7 +117,7 @@
     "expiryDate": "2028-06-30"
   },
   {
-    "id": 8,
+    "id": 14,
     "name": "Shampoo",
     "category": "Personal Care",
     "image": "https://i.pinimg.com/1200x/11/71/10/117110a5292640f44906f2d011ec87d4.jpg",
@@ -72,7 +126,7 @@
     "expiryDate": "2026-01-15"
   },
   {
-    "id": 9,
+    "id": 15,
     "name": "Toothpaste",
     "category": "Personal Care",
     "image": "https://i.pinimg.com/736x/ea/d4/a1/ead4a18eac6ea25ab209ec3abe987a71.jpg",
@@ -81,7 +135,7 @@
     "expiryDate": "2026-03-10"
   },
   {
-    "id": 10,
+    "id": 16,
     "name": "Notebook",
     "category": "Stationery",
     "image": "https://i.pinimg.com/736x/0e/d4/38/0ed43841b4d2fb816d14b8d8f01ae6d6.jpg",
@@ -90,7 +144,7 @@
     "expiryDate": null
   },
   {
-    "id": 11,
+    "id": 17,
     "name": "Ballpoint Pen",
     "category": "Stationery",
     "image": "https://i.pinimg.com/736x/e5/90/67/e590675ec56629109e90732a03f64de5.jpg",
@@ -99,7 +153,7 @@
     "expiryDate": "2051-06-30"
   },
   {
-    "id": 12,
+    "id": 18,
     "name": "Face Cream",
     "category": "Personal Care",
     "image": "https://i.pinimg.com/736x/d5/9a/9e/d59a9e80e6ec1f44347e82e350835ec4.jpg",
@@ -108,7 +162,7 @@
     "expiryDate": "2026-06-30"
   },
   {
-    "id": 13,
+    "id": 19,
     "name": "Laptop",
     "category": "Electronics",
     "image": "https://i.pinimg.com/736x/d0/02/08/d00208dc2bfbba705f755b4aa927ce62.jpg",
@@ -117,7 +171,7 @@
     "expiryDate": "2027-11-30"
   },
   {
-    "id": 14,
+    "id": 20,
     "name": "Jeans",
     "category": "Fashion",
     "image": "https://i.pinimg.com/236x/de/36/7d/de367df8fb57012eae77d875c258b736.jpg",
@@ -126,12 +180,93 @@
     "expiryDate": "2030-06-30"
   },
   {
-    "id": 15,
+    "id": 21,
     "name": "Highlighter Set",
     "category": "Stationery",
     "image": "https://i.pinimg.com/736x/88/7f/16/887f164fd7f5891152ffc487d69e71f9.jpg",
     "pricing": { "price": 4.5, "discount": 0.1 },
     "inventory": { "unitsInStock": 35, "unitsSold": 110 },
     "expiryDate": "2046-03-30"
+  },
+  {
+    "id": 22,
+    "name": "Fresh Carrots",
+    "category": "Vegetables",
+    "image": "https://images.unsplash.com/photo-1447175008436-1701707a6686?w=400",
+    "pricing": { "price": 80, "discount": 0 },
+    "inventory": { "unitsInStock": 45, "unitsSold": 30 },
+    "expiryDate": "2024-02-18"
+  },
+  {
+    "id": 23,
+    "name": "Apples",
+    "category": "Fruits",
+    "image": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400",
+    "pricing": { "price": 250, "discount": 0.1 },
+    "inventory": { "unitsInStock": 40, "unitsSold": 35 },
+    "expiryDate": "2024-02-25"
+  },
+  {
+    "id": 24,
+    "name": "Cheese",
+    "category": "Dairy",
+    "image": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400",
+    "pricing": { "price": 450, "discount": 0.05 },
+    "inventory": { "unitsInStock": 15, "unitsSold": 25 },
+    "expiryDate": "2024-03-15"
+  },
+  {
+    "id": 25,
+    "name": "Croissant",
+    "category": "Bakery",
+    "image": "https://images.unsplash.com/photo-1555507036-ab1f4038805a?w=400",
+    "pricing": { "price": 120, "discount": 0 },
+    "inventory": { "unitsInStock": 25, "unitsSold": 40 },
+    "expiryDate": "2024-02-14"
+  },
+  {
+    "id": 26,
+    "name": "Running Shoes",
+    "category": "Fashion",
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400",
+    "pricing": { "price": 3500, "discount": 0.2 },
+    "inventory": { "unitsInStock": 8, "unitsSold": 15 },
+    "expiryDate": null
+  },
+  {
+    "id": 27,
+    "name": "Wireless Mouse",
+    "category": "Electronics",
+    "image": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400",
+    "pricing": { "price": 2500, "discount": 0.15 },
+    "inventory": { "unitsInStock": 12, "unitsSold": 8 },
+    "expiryDate": "2028-12-31"
+  },
+  {
+    "id": 28,
+    "name": "Hand Soap",
+    "category": "Personal Care",
+    "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400",
+    "pricing": { "price": 180, "discount": 0 },
+    "inventory": { "unitsInStock": 35, "unitsSold": 60 },
+    "expiryDate": "2026-08-15"
+  },
+  {
+    "id": 29,
+    "name": "Stapler",
+    "category": "Stationery",
+    "image": "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400",
+    "pricing": { "price": 150, "discount": 0 },
+    "inventory": { "unitsInStock": 20, "unitsSold": 15 },
+    "expiryDate": null
+  },
+  {
+    "id": 30,
+    "name": "Coffee Beans",
+    "category": "Food",
+    "image": "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400",
+    "pricing": { "price": 800, "discount": 0.1 },
+    "inventory": { "unitsInStock": 10, "unitsSold": 25 },
+    "expiryDate": "2025-06-30"
   }
 ]

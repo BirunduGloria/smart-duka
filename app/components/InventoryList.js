@@ -3,25 +3,68 @@
 import React, { useState, useEffect } from 'react';
 import { useUserContext } from '../context/UserContext';
 import ProductForm from './ProductForm';
+import { fetchProducts, getProductStats } from '../utils/productData';
 
 export default function InventoryList() {
   const { user } = useUserContext();
   const [products, setProducts] = useState([]);
+  const [stats, setStats] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [editPriceId, setEditPriceId] = useState(null);
   const [newPrice, setNewPrice] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editFields, setEditFields] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('/products.json')
-      .then(res => res.json())
-      .then(data => setProducts(data));
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const [productsData, statsData] = await Promise.all([
+          fetchProducts(),
+          getProductStats()
+        ]);
+        
+        setProducts(productsData);
+        setStats(statsData);
+      } catch (err) {
+        setError('Failed to load inventory data');
+        console.error('Error loading inventory:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   if (!user || user.role !== 'admin') {
     return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 max-w-6xl mx-auto">
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4">Loading inventory...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 max-w-6xl mx-auto">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          Error: {error}
+        </div>
+      </div>
+    );
   }
 
   // Add quantity handler
@@ -40,6 +83,7 @@ export default function InventoryList() {
     setEditPriceId(id);
     setNewPrice(price);
   };
+  
   const handleSavePrice = (id) => {
     setProducts((prev) =>
       prev.map((p) =>
@@ -66,10 +110,13 @@ export default function InventoryList() {
 
   const handleEditFieldChange = (e) => {
     const { name, value } = e.target;
-    setEditFields((prev) => ({ ...prev, [name]: name === 'price' || name === 'unitsInStock' || name === 'unitsSold' ? Number(value) : value }));
+    setEditFields(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const handleSaveInlineEdit = (id) => {
+  const handleSaveEdit = (id) => {
     setProducts((prev) =>
       prev.map((p) =>
         p.id === id
@@ -77,8 +124,12 @@ export default function InventoryList() {
               ...p,
               name: editFields.name,
               category: editFields.category,
-              pricing: { ...p.pricing, price: editFields.price },
-              inventory: { ...p.inventory, unitsInStock: editFields.unitsInStock, unitsSold: editFields.unitsSold },
+              pricing: { ...p.pricing, price: Number(editFields.price) },
+              inventory: { 
+                ...p.inventory, 
+                unitsInStock: Number(editFields.unitsInStock), 
+                unitsSold: Number(editFields.unitsSold) 
+              },
             }
           : p
       )
@@ -87,181 +138,173 @@ export default function InventoryList() {
     setEditFields({});
   };
 
-  const handleCancelInlineEdit = () => {
+  const handleCancelEdit = () => {
     setEditingId(null);
     setEditFields({});
   };
 
-  // Add product handler
-  const handleAddProduct = () => {
-    setEditingProduct(null);
-    setShowForm(true);
-  };
-
-  // Save (add or update) product
-  const handleSaveProduct = (formData) => {
-    if (formData.id) {
-      // Update
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === formData.id
-            ? {
-                ...p,
-                name: formData.name,
-                category: formData.category,
-                pricing: { ...p.pricing, price: formData.price, discount: formData.discount },
-                inventory: { ...p.inventory, unitsInStock: formData.stock, unitsSold: formData.unitsSold },
-                expiryDate: formData.expiry,
-              }
-            : p
-        )
-      );
-    } else {
-      // Add new
-      const newId = Math.max(...products.map((p) => p.id)) + 1;
-      setProducts((prev) => [
-        ...prev,
-        {
-          id: newId,
-          name: formData.name,
-          category: formData.category,
-          pricing: { price: formData.price, discount: formData.discount },
-          inventory: { unitsInStock: formData.stock, unitsSold: formData.unitsSold },
-          expiryDate: formData.expiry,
-        },
-      ]);
-    }
-    setShowForm(false);
-    setEditingProduct(null);
-  };
-
-  const handleCancelForm = () => {
-    setShowForm(false);
-    setEditingProduct(null);
-  };
-
   return (
-    <div className="flex flex-col items-center w-full mx-[30px]">
-      <div className="w-full flex justify-end mb-4">
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Inventory Management</h1>
         <button
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          onClick={handleAddProduct}
+          onClick={() => setShowForm(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-300"
         >
           Add Product
         </button>
       </div>
-      <div className="overflow-x-auto w-full">
-        <div className="bg-white rounded shadow p-4">
-          <table className="min-w-full bg-white">
-            <thead>
-              <tr className="text-left">
-                <th className="py-2 px-4">ID</th>
-                <th className="py-2 px-4">Name</th>
-                <th className="py-2 px-4">Category</th>
-                <th className="py-2 px-4">Quantity</th>
-                <th className="py-2 px-4">Sold</th>
-                <th className="py-2 px-4">Price</th>
-                <th className="py-2 px-4">Edit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => {
-                const { id, name, category, pricing, inventory } = product;
-                return (
-                  <React.Fragment key={id}>
-                    <tr className="hover:bg-gray-50">
-                      <td className="py-2 px-4">{id}</td>
-                      <td className="py-2 px-4">{name}</td>
-                      <td className="py-2 px-4">{category}</td>
-                      <td className="py-2 px-4">{inventory.unitsInStock}</td>
-                      <td className="py-2 px-4">{inventory.unitsSold}</td>
-                      <td className="py-2 px-4">Ksh {pricing.price.toFixed(2)}</td>
-                      <td className="py-2 px-4">
-                        <button
-                          className="bg-green-600 text-white px-3 py-1 rounded mr-2"
-                          onClick={() => handleEditProduct(product)}
-                          disabled={editingId !== null && editingId !== id}
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                    {editingId === id && (
-                      <tr className="bg-gray-50">
-                        <td className="py-2 px-4"></td>
-                        <td className="py-2 px-4">
-                          <input
-                            name="name"
-                            value={editFields.name}
-                            onChange={handleEditFieldChange}
-                            className="border rounded px-2 py-1 w-full"
-                          />
-                        </td>
-                        <td className="py-2 px-4">
-                          <input
-                            name="category"
-                            value={editFields.category}
-                            onChange={handleEditFieldChange}
-                            className="border rounded px-2 py-1 w-full"
-                          />
-                        </td>
-                        <td className="py-2 px-4">
-                          <input
-                            name="unitsInStock"
-                            type="number"
-                            value={editFields.unitsInStock}
-                            onChange={handleEditFieldChange}
-                            className="border rounded px-2 py-1 w-full"
-                          />
-                        </td>
-                        <td className="py-2 px-4">
-                          <input
-                            name="unitsSold"
-                            type="number"
-                            value={editFields.unitsSold}
-                            onChange={handleEditFieldChange}
-                            className="border rounded px-2 py-1 w-full"
-                          />
-                        </td>
-                        <td className="py-2 px-4">
-                          <input
-                            name="price"
-                            type="number"
-                            value={editFields.price}
-                            onChange={handleEditFieldChange}
-                            className="border rounded px-2 py-1 w-full"
-                          />
-                        </td>
-                        <td className="py-2 px-4 flex gap-2">
-                          <button
-                            className="bg-blue-600 text-white px-3 py-1 rounded"
-                            onClick={() => handleSaveInlineEdit(id)}
-                          >
-                            Save
-                          </button>
-                          <button
-                            className="bg-gray-400 text-white px-3 py-1 rounded"
-                            onClick={handleCancelInlineEdit}
-                          >
-                            Cancel
-                          </button>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+
+      {/* Stats Overview */}
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <h3 className="font-medium text-blue-800">Total Products</h3>
+            <p className="text-2xl font-bold text-blue-600">{stats.totalProducts}</p>
+          </div>
+          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+            <h3 className="font-medium text-green-800">Total Stock</h3>
+            <p className="text-2xl font-bold text-green-600">{stats.totalStock}</p>
+          </div>
+          <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+            <h3 className="font-medium text-yellow-800">Low Stock Items</h3>
+            <p className="text-2xl font-bold text-yellow-600">{stats.lowStockItems}</p>
+          </div>
+          <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+            <h3 className="font-medium text-red-800">Expiring Soon</h3>
+            <p className="text-2xl font-bold text-red-600">{stats.expiringSoon}</p>
+          </div>
         </div>
-      </div>
+      )}
+
       {showForm && (
         <ProductForm
-          product={editingProduct}
-          onSave={handleSaveProduct}
-          onCancel={handleCancelForm}
+          onClose={() => setShowForm(false)}
+          onSubmit={(newProduct) => {
+            setProducts(prev => [...prev, { ...newProduct, id: Date.now() }]);
+            setShowForm(false);
+          }}
         />
       )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {products.map((product) => (
+          <div key={product.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-300">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleAddQuantity(product.id)}
+                  className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-sm transition-colors duration-300"
+                >
+                  +1
+                </button>
+                <button
+                  onClick={() => handleEditProduct(product)}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm transition-colors duration-300"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+
+            {editingId === product.id ? (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  name="name"
+                  value={editFields.name}
+                  onChange={handleEditFieldChange}
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                  placeholder="Product name"
+                />
+                <input
+                  type="text"
+                  name="category"
+                  value={editFields.category}
+                  onChange={handleEditFieldChange}
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                  placeholder="Category"
+                />
+                <input
+                  type="number"
+                  name="unitsInStock"
+                  value={editFields.unitsInStock}
+                  onChange={handleEditFieldChange}
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                  placeholder="Stock"
+                />
+                <input
+                  type="number"
+                  name="price"
+                  value={editFields.price}
+                  onChange={handleEditFieldChange}
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                  placeholder="Price"
+                />
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleSaveEdit(product.id)}
+                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition-colors duration-300"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm transition-colors duration-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className="text-gray-600 mb-2">Category: {product.category}</p>
+                <p className="text-gray-600 mb-2">Stock: {product.inventory.unitsInStock}</p>
+                <p className="text-gray-600 mb-2">Sold: {product.inventory.unitsSold}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-bold text-blue-600">
+                    ${product.pricing.price}
+                  </span>
+                  {editPriceId === product.id ? (
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        value={newPrice}
+                        onChange={(e) => setNewPrice(e.target.value)}
+                        className="w-20 p-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                      />
+                      <button
+                        onClick={() => handleSavePrice(product.id)}
+                        className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs transition-colors duration-300"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleEditPrice(product.id, product.pricing.price)}
+                      className="text-blue-500 hover:text-blue-700 text-sm transition-colors duration-300"
+                    >
+                      Edit Price
+                    </button>
+                  )}
+                </div>
+                {product.expiryDate && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    Expires: {product.expiryDate}
+                  </p>
+                )}
+                {product.pricing.discount > 0 && (
+                  <p className="text-sm text-green-600 mt-1">
+                    {Math.round(product.pricing.discount * 100)}% OFF
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

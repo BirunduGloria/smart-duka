@@ -36,9 +36,9 @@ export default function Home() {
       try {
         setLoading(true);
         setError(null);
-        console.log('Fetching products from /data/products.json...');
+        console.log('Fetching products from /products.json...');
         
-        const response = await fetch('/data/products.json');
+        const response = await fetch('/products.json');
         console.log('Response status:', response.status);
         console.log('Response ok:', response.ok);
         
